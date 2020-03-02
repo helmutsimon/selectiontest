@@ -1,0 +1,151 @@
+# coding=utf-8
+
+
+""" Contains functions to allow testing of evolutionary neutrality (\rho) by relative likelihood.
+    Specifically contains fuctionality to compute \rho; compute Tajima's D; compute thresholds for
+    \rho and generate a null distribution for piecewise constant populations.
+    """
+
+import numpy as np
+import sys
+from bisect import bisect
+from scipy.special import binom
+from scipy.stats import multinomial, expon
+from scipy.stats import dirichlet
+
+
+def get_ERM_matrix(n):
+    ERM_matrix = np.zeros((n - 1, n - 1))
+    for m in range(n - 1):
+        for k in range(n - 1):
+            ERM_matrix[m, k] = (k + 2) * binom(n - m - 2, k) / binom(n - 1, k + 1)
+    return ERM_matrix
+
+
+def generate_wf_variates(n, reps, random_state=None):
+    """Calculate variates for probability distribution Q under Wright Fisher model."""
+    erm = get_ERM_matrix(n)
+    kvec = np.arange(2, n + 1, dtype=int)
+    branch_lengths = expon.rvs(scale=1 / binom(kvec, 2), size=(reps, n - 1), random_state=random_state)
+    total_branch_lengths = branch_lengths @ kvec
+    rel_branch_lengths = list()
+    for row, total_length in zip(branch_lengths, total_branch_lengths):
+        rel_row = row / total_length
+        rel_branch_lengths.append(rel_row)
+    rel_branch_lengths = np.array(rel_branch_lengths)
+    variates = (erm @ rel_branch_lengths.T).T
+    return variates
+
+
+def generate_uniform_variates(n, reps, random_state=None):
+    """Calculate variates for uniform probability distribution."""
+    j_n = np.diag(1 / np.arange(2, n + 1))
+    erm = get_ERM_matrix(n)
+    avge_mx = erm.dot(j_n)
+    sample = dirichlet.rvs(np.ones(n - 1), size=reps, random_state=random_state)
+    variates = avge_mx @ sample.T
+    return variates.T
+
+
+def test_neutrality(sfs, variates0=None, variates1=None, reps=10000):
+    """Calculate \rho, the log odds ratio for neutral / not neutral."""
+    n = len(sfs) + 1
+    if variates0 is None:
+        variates0 = generate_wf_variates(n, reps)
+    if variates1 is None:
+        variates1 = generate_uniform_variates(n, reps)
+    h0 = np.mean(multinomial.pmf(sfs, np.sum(sfs), variates0))
+    h1 = np.mean(multinomial.pmf(sfs, np.sum(sfs), variates1))
+    if h0 == 0 or h1 == 0:
+        print(sfs, 'h0 = ', h0, 'h1 = ', h1)
+        if h0 != 0:
+            h1 = sys.float_info.min
+    return np.log10(h0) - np.log10(h1)
+
+
+def pi_calc(sfs):
+    """Calculate the mean number of pairwise differences from a site frequency spectrum."""
+    sfs = np.array(sfs)
+    n = len(sfs) + 1
+    g1 = np.arange(1, n)
+    g2 = n - g1
+    g3 = g1 * g2 * sfs
+    pi = np.sum(g3) * 2 / (n * (n - 1))
+    return pi
+
+
+def calculate_D(sfs):
+    """Calculate Tajima's D from a site frequency spectrum."""
+    seg_sites = np.sum(sfs)
+    pi = pi_calc(sfs)
+    n = len(sfs) + 1
+    n_seq = np.arange(1, n)
+    a1 = (1 / n_seq).sum()
+    a2 = ((1 / n_seq) ** 2).sum()
+    b1 = (n + 1) / (3 * (n - 1))
+    b2 = (2 * (n ** 2 + n + 3)) / (9 * n * (n - 1))
+    c1 = b1 - (1 / a1)
+    c2 = b2 - ((n + 2) / (a1 * n)) + (a2 / a1 ** 2)
+    e1 = c1 / a1
+    e2 = c2 / (a1 ** 2 + a2)
+    tajD = (pi - (seg_sites / a1)) / np.sqrt(e1 * seg_sites + e2 * seg_sites * (seg_sites - 1))
+    return tajD
+
+
+def mul(seg_sites):
+    def multinom(p):
+        return multinomial.rvs(seg_sites, p)
+
+    return multinom
+
+
+def generate_sfs_array(n, seg_sites, reps=10000):
+    """Sample SFS values for Wright-Fisher model for given sample size n and conditioned on the
+    number of segregating sites."""
+    variates = generate_wf_variates(n, reps)
+    sfs_array = np.apply_along_axis(mul(seg_sites), 1, variates)
+    return sfs_array
+
+
+def compute_threshold(n, seg_sites, reps=10000, threshold=0.02):
+    """Calculate threshold value of RLNT below which we reject the neutral hypothesis."""
+    sfs_array = generate_sfs_array(n, seg_sites, reps)
+    results = np.apply_along_axis(test_neutrality, 1, sfs_array)
+    results = np.sort(results)
+    results = results[~np.isnan(results)]
+    return results[int(len(results) * threshold)]
+
+
+def calc_breakpoints(pop_sizes, timepoints):
+    y = 0
+    result = [0]
+    for i in range(0, len(timepoints) - 1):
+        y += (pop_sizes[0] / pop_sizes[i]) * (timepoints[i + 1] - timepoints[i])
+        result.append(y)
+    return result
+
+
+def calc_branch_length2(pop_sizes, timepoints):
+    def calc_branch_length3(branch):
+        breakpoints = calc_breakpoints(pop_sizes, timepoints)
+        i = bisect(breakpoints, branch)
+        return timepoints[i - 1] + (pop_sizes[i - 1] / pop_sizes[0]) * (branch - breakpoints[i - 1])
+
+    return calc_branch_length3
+
+
+def transform_branch_variates(variates, pop_sizes, timepoints):
+    branches = np.flip(variates, axis=1)
+    s_k = np.cumsum(branches, axis=1)
+    func1 = calc_branch_length2(pop_sizes, timepoints)
+    vfunc = np.vectorize(func1)
+    coal_times = vfunc(s_k)
+    temp = np.diff(coal_times, axis=1)
+    col2 = coal_times[:, 0]
+    col2.shape = (col2.shape[0], 1)
+    temp1 = np.hstack([col2, temp])
+    return np.flip(temp1, axis=1)
+
+
+
+
