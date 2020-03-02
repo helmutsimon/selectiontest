@@ -1,8 +1,0 @@
-README.md
-setup.py
-selectiontest/__init__.py
-selectiontest/selectiontest.py
-selectiontest_helmutsimon.egg-info/PKG-INFO
-selectiontest_helmutsimon.egg-info/SOURCES.txt
-selectiontest_helmutsimon.egg-info/dependency_links.txt
-selectiontest_helmutsimon.egg-info/top_level.txt
