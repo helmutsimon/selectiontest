@@ -9,15 +9,16 @@
 import numpy as np
 import sys
 from bisect import bisect
+from math import log, factorial
 from scipy.special import binom
 from scipy.stats import multinomial, expon
 from scipy.stats import dirichlet
 
 
 __author__ = "Helmut Simon"
-__copyright__ = "Copyright 2020-2020, Helmut Simon"
+__copyright__ = "© Copyright 2020, Helmut Simon"
 __license__ = "BSD-3"
-__version__ = "0.0.3"
+__version__ = "0.0.6"
 __maintainer__ = "Helmut Simon"
 __email__ = "helmut.simon@anu.edu.au"
 __status__ = "Test"
@@ -57,6 +58,23 @@ def generate_uniform_variates(n, reps, random_state=None):
     return variates.T
 
 
+def multinomial_pmf(counts, probs):
+    """Calculate PMF of multinomial diostribution. Number of draws is the sum of counts.
+    probs can be a 2D array, with each row totalling 1."""
+    xx = list()
+    for row in probs:
+        new_row = np.log(row) * counts
+        xx.append(new_row)
+    xx = np.array(xx)
+    counts = np.array(counts)
+    xx[:, np.where(counts == 0.)] = 0.   # otherwise x will contain NaN even if count = 0
+    x = np.sum(xx, axis=1)
+    y = np.sum([log(factorial(i)) for i in counts])
+    z = np.sum(np.log(np.arange(1, sum(counts) + 1)))
+    mult_prob = np.exp(x + z - y)
+    return mult_prob
+
+
 def test_neutrality(sfs, variates0=None, variates1=None, reps=10000):
     """Calculate \rho, the log odds ratio for neutral / not neutral."""
     n = len(sfs) + 1
@@ -64,8 +82,8 @@ def test_neutrality(sfs, variates0=None, variates1=None, reps=10000):
         variates0 = generate_wf_variates(n, reps)
     if variates1 is None:
         variates1 = generate_uniform_variates(n, reps)
-    h0 = np.mean(multinomial.pmf(sfs, np.sum(sfs), variates0))
-    h1 = np.mean(multinomial.pmf(sfs, np.sum(sfs), variates1))
+    h0 = np.mean(multinomial_pmf(sfs, variates0))
+    h1 = np.mean(multinomial_pmf(sfs, variates1))
     if h0 == 0 or h1 == 0:
         print(sfs, 'h0 = ', h0, 'h1 = ', h1)
         if h0 != 0:
