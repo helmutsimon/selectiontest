@@ -14,7 +14,7 @@ setuptools.setup(
     long_description_content_type="text/markdown",
     url="https://github.com/helmutsimon/SelectionTest",
     packages=setuptools.find_packages(),
-    scripts=['bin/calc_TajD.py', 'bin/generate_uniform_variates.py', 'bin/generate_wf_variates.py', 'bin/test_neutrality.py'],
+    scripts=['bin/calc_TajD', 'bin/generate_uniform_variates', 'bin/generate_wf_variates', 'bin/test_neutrality'],
     classifiers=[
         "Programming Language :: Python :: 3",
         "License :: OSI Approved :: BSD License",
