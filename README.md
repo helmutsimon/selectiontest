@@ -6,7 +6,7 @@ Functions available include:
 * calculate statistic for relative neutrality, &rho;, which is a relative likelihood of two models;
 * generate variates corresponding to the Wright-Fisher model and the `uniform distribution' model;
 * calculate Tajima's D (for comparison purposes);
-* calibrate &rho;, that is, find th threshold corresponding to a desired false positive (Type I error) rate; and
+* calibrate &rho;, that is, find the threshold corresponding to a desired false positive (Type I error) rate; and
 * generate variates corresponding to a piece-wise constant demographic history.
 
 
