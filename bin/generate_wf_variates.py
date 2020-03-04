@@ -1,4 +1,4 @@
-# coding=utf-8
+#!/usr/bin/env python
 
 """A command line wrapper for sampling from the distribution Q under the Wright-Fisher model.."""
 

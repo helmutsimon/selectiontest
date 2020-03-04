@@ -1,4 +1,5 @@
-# coding=utf-8
+#!/usr/bin/env python
+
 
 """A command line wrapper for sampling from the distribution Q when Q is a uniform distribution."""
 

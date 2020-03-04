@@ -1,4 +1,4 @@
-# coding=utf-8
+#!/usr/bin/env python
 
 """A command line wrapper for calculation of neutrality test statistic rho."""
 
