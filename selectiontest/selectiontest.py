@@ -30,7 +30,21 @@ def get_ERM_matrix(n):
 
 def generate_wf_variates(n, reps, random_state=None):
     """
-    Calculate variates for probability distribution Q under Wright Fisher model.
+    Calculate variates for the probability distribution Q under Wright Fisher model.
+
+    Parameters
+    ----------
+    n: int
+        Sample size
+    reps: int
+        Number of variates to generate if default is used.
+    random_state: int
+        Value used to seed local RandomState instance for generating variates from exponential distribution.
+
+    Returns
+    -------
+    numpy.ndarray
+         Array of variates
 
     """
 
@@ -49,9 +63,24 @@ def generate_wf_variates(n, reps, random_state=None):
 
 def generate_uniform_variates(n, reps, random_state=None):
     """
-    Calculate variates for uniform probability distribution.
+    Calculate variates for the uniform probability distribution Q.
+
+    Parameters
+    ----------
+    n: int
+        Sample size
+    reps: int
+        Number of variates to generate if default is used.
+    random_state: int
+        Value used to seed local RandomState instance for generating variates from Dirichlet distribution.
+
+    Returns
+    -------
+    numpy.ndarray
+         Array of variates
 
     """
+
 
     j_n = np.diag(1 / np.arange(2, n + 1))
     erm = get_ERM_matrix(n)
@@ -63,7 +92,7 @@ def generate_uniform_variates(n, reps, random_state=None):
 
 def multinomial_pmf(counts, probs):
     """
-    Calculate PMF of multinomial diostribution. Number of draws is the sum of counts.
+    Calculate PMF of multinomial distribution. Number of draws is the sum of counts.
     probs can be a 2D array, with each row totalling 1.
 
     """
@@ -84,9 +113,27 @@ def multinomial_pmf(counts, probs):
 
 def test_neutrality(sfs, variates0=None, variates1=None, reps=10000):
     """
-    Calculate rho, the log odds ratio for neutrality over non-neutrality.
+    Calculate :math:`\\rho`, the log odds ratio of the data for the distribution given by variates0 over
+    the distribution given by variates1.
+
+    Parameters
+    ----------
+    sfs: string
+        Site frequency spectrum separated by commas, e.g. 1,3,0,2,1
+    variates0: numpy array
+        Array of variates from null hypothesis distribution. Default uses Wright-Fisher model.
+    variates1: numpy array
+        Array of variates from null hypothesis distribution. Default uses \`uniform\' model.
+    reps: int
+        Number of variates to generate if default is used.
+
+    Returns
+    -------
+    float
+        :math:`\\rho` (value of log odds ratio)
 
     """
+
 
     n = len(sfs) + 1
     if variates0 is None:
