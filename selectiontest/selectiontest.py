@@ -34,7 +34,11 @@ def get_ERM_matrix(n):
 
 
 def generate_wf_variates(n, reps, random_state=None):
-    """Calculate variates for probability distribution Q under Wright Fisher model."""
+    """
+    Calculate variates for probability distribution Q under Wright Fisher model.
+
+    """
+
     erm = get_ERM_matrix(n)
     kvec = np.arange(2, n + 1, dtype=int)
     branch_lengths = expon.rvs(scale=1 / binom(kvec, 2), size=(reps, n - 1), random_state=random_state)
@@ -49,7 +53,11 @@ def generate_wf_variates(n, reps, random_state=None):
 
 
 def generate_uniform_variates(n, reps, random_state=None):
-    """Calculate variates for uniform probability distribution."""
+    """
+    Calculate variates for uniform probability distribution.
+
+    """
+
     j_n = np.diag(1 / np.arange(2, n + 1))
     erm = get_ERM_matrix(n)
     avge_mx = erm.dot(j_n)
@@ -59,8 +67,12 @@ def generate_uniform_variates(n, reps, random_state=None):
 
 
 def multinomial_pmf(counts, probs):
-    """Calculate PMF of multinomial diostribution. Number of draws is the sum of counts.
-    probs can be a 2D array, with each row totalling 1."""
+    """
+    Calculate PMF of multinomial diostribution. Number of draws is the sum of counts.
+    probs can be a 2D array, with each row totalling 1.
+
+    """
+
     xx = list()
     for row in probs:
         new_row = np.log(row) * counts
@@ -76,7 +88,11 @@ def multinomial_pmf(counts, probs):
 
 
 def test_neutrality(sfs, variates0=None, variates1=None, reps=10000):
-    """Calculate \rho, the log odds ratio for neutral / not neutral."""
+    """
+    Calculate \rho, the log odds ratio for neutral / not neutral.
+
+    """
+
     n = len(sfs) + 1
     if variates0 is None:
         variates0 = generate_wf_variates(n, reps)
@@ -92,7 +108,11 @@ def test_neutrality(sfs, variates0=None, variates1=None, reps=10000):
 
 
 def pi_calc(sfs):
-    """Calculate the mean number of pairwise differences from a site frequency spectrum."""
+    """
+    Calculate the mean number of pairwise differences from a site frequency spectrum.
+
+    """
+
     sfs = np.array(sfs)
     n = len(sfs) + 1
     g1 = np.arange(1, n)
@@ -103,7 +123,11 @@ def pi_calc(sfs):
 
 
 def calculate_D(sfs):
-    """Calculate Tajima's D from a site frequency spectrum."""
+    """
+    Calculate Tajima's D from a site frequency spectrum.
+
+    """
+
     seg_sites = np.sum(sfs)
     pi = pi_calc(sfs)
     n = len(sfs) + 1
@@ -128,15 +152,23 @@ def mul(seg_sites):
 
 
 def generate_sfs_array(n, seg_sites, reps=10000):
-    """Sample SFS values for Wright-Fisher model for given sample size n and conditioned on the
-    number of segregating sites."""
+    """
+    Sample SFS values for Wright-Fisher model for given sample size n and conditioned on the
+    number of segregating sites.
+
+    """
+
     variates = generate_wf_variates(n, reps)
     sfs_array = np.apply_along_axis(mul(seg_sites), 1, variates)
     return sfs_array
 
 
 def compute_threshold(n, seg_sites, reps=10000, threshold=0.02):
-    """Calculate threshold value of RLNT below which we reject the neutral hypothesis."""
+    """
+    Calculate threshold value of RLNT below which we reject the neutral hypothesis.
+
+    """
+    
     sfs_array = generate_sfs_array(n, seg_sites, reps)
     results = np.apply_along_axis(test_neutrality, 1, sfs_array)
     results = np.sort(results)
