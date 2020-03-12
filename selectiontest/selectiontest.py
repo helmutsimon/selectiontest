@@ -1,11 +1,6 @@
 # coding=utf-8
 
 
-""" Contains functions to allow testing of evolutionary neutrality (\rho) by relative likelihood.
-    Specifically contains fuctionality to compute \rho; compute Tajima's D; compute thresholds for
-    \rho and generate a null distribution for piecewise constant populations.
-    """
-
 import numpy as np
 import sys
 from bisect import bisect
@@ -89,7 +84,7 @@ def multinomial_pmf(counts, probs):
 
 def test_neutrality(sfs, variates0=None, variates1=None, reps=10000):
     """
-    Calculate \rho, the log odds ratio for neutral / not neutral.
+    Calculate rho, the log odds ratio for neutrality over non-neutrality.
 
     """
 
@@ -168,7 +163,7 @@ def compute_threshold(n, seg_sites, reps=10000, threshold=0.02):
     Calculate threshold value of RLNT below which we reject the neutral hypothesis.
 
     """
-    
+
     sfs_array = generate_sfs_array(n, seg_sites, reps)
     results = np.apply_along_axis(test_neutrality, 1, sfs_array)
     results = np.sort(results)
