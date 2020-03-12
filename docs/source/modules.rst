@@ -2,6 +2,8 @@ Python modules
 ==============
 
 .. automodule:: selectiontest.selectiontest
-    :members:
+    :members: test_neutrality, calculate_D
+
+
 
 
