@@ -207,7 +207,25 @@ def generate_sfs_array(n, seg_sites, reps=10000):
 
 def compute_threshold(n, seg_sites, reps=10000, threshold=0.02):
     """
-    Calculate threshold value of RLNT below which we reject the neutral hypothesis.
+    Calculate threshold value of :math:`\\rho` corresponding to a given false positive rate (FPR).
+    For values of :math:`\\rho` below the threshold we reject the
+    null (by default neutral) hypothesis.
+
+    Parameters
+    ----------
+    n: int
+        Sample size
+    seg_sites: int
+        Number of segregating sites in sample.
+    reps: int
+        Number of variates to generate if default is used.
+    fpr: float
+        Selected FPR tolerance.
+
+    Returns
+    -------
+    float
+        Threshold value (upper) for log odds ratio
 
     """
 
@@ -237,6 +255,11 @@ def calc_branch_length2(pop_sizes, timepoints):
 
 
 def transform_branch_variates(variates, pop_sizes, timepoints):
+    """
+    Generate variates for a piecewise constant demographic scenario.
+    TODO: make W-F input the default.
+
+    """
     branches = np.flip(variates, axis=1)
     s_k = np.cumsum(branches, axis=1)
     func1 = calc_branch_length2(pop_sizes, timepoints)
