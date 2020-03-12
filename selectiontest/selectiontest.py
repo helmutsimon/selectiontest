@@ -47,7 +47,6 @@ def generate_wf_variates(n, reps, random_state=None):
          Array of variates
 
     """
-
     erm = get_ERM_matrix(n)
     kvec = np.arange(2, n + 1, dtype=int)
     branch_lengths = expon.rvs(scale=1 / binom(kvec, 2), size=(reps, n - 1), random_state=random_state)
@@ -80,8 +79,6 @@ def generate_uniform_variates(n, reps, random_state=None):
          Array of variates
 
     """
-
-
     j_n = np.diag(1 / np.arange(2, n + 1))
     erm = get_ERM_matrix(n)
     avge_mx = erm.dot(j_n)
@@ -96,7 +93,6 @@ def multinomial_pmf(counts, probs):
     probs can be a 2D array, with each row totalling 1.
 
     """
-
     xx = list()
     for row in probs:
         new_row = np.log(row) * counts
@@ -133,8 +129,6 @@ def test_neutrality(sfs, variates0=None, variates1=None, reps=10000):
         :math:`\\rho` (value of log odds ratio)
 
     """
-
-
     n = len(sfs) + 1
     if variates0 is None:
         variates0 = generate_wf_variates(n, reps)
@@ -154,7 +148,6 @@ def pi_calc(sfs):
     Calculate the mean number of pairwise differences from a site frequency spectrum.
 
     """
-
     sfs = np.array(sfs)
     n = len(sfs) + 1
     g1 = np.arange(1, n)
@@ -168,8 +161,17 @@ def calculate_D(sfs):
     """
     Calculate Tajima's D from a site frequency spectrum.
 
-    """
+    Parameters
+    ----------
+    sfs: string
+        Site frequency spectrum separated by commas, e.g. 1,3,0,2,1
 
+    Returns
+    -------
+    float
+        Value of Tajima\'s D.
+
+    """
     seg_sites = np.sum(sfs)
     pi = pi_calc(sfs)
     n = len(sfs) + 1
@@ -199,7 +201,6 @@ def generate_sfs_array(n, seg_sites, reps=10000):
     number of segregating sites.
 
     """
-
     variates = generate_wf_variates(n, reps)
     sfs_array = np.apply_along_axis(mul(seg_sites), 1, variates)
     return sfs_array
@@ -254,12 +255,28 @@ def calc_branch_length2(pop_sizes, timepoints):
     return calc_branch_length3
 
 
-def transform_branch_variates(variates, pop_sizes, timepoints):
+def piecewise_constant_variates(n, timepoints, pop_sizes, reps=10000):
     """
-    Generate variates for a piecewise constant demographic scenario.
-    TODO: make W-F input the default.
+    Generate variates corresponding to a piecewise constant demographic ghistory.
+
+    Parameters
+    ----------
+    n: int
+        Sample size
+    timepoints: float
+        Times at which population changes (in generations, backward from the present).
+    pop_sizes: float
+        Population sizes between timepoints (only relative sizes matter.)
+    reps: int
+        Number of variates to generate.
+
+    Returns
+    -------
+    numpy.ndarray
+         Array of variates
 
     """
+    variates = generate_wf_variates(n, reps)
     branches = np.flip(variates, axis=1)
     s_k = np.cumsum(branches, axis=1)
     func1 = calc_branch_length2(pop_sizes, timepoints)
