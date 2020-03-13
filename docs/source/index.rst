@@ -4,8 +4,8 @@ Welcome to selectiontest's documentation!
 =========================================
 
 Overview
-========
-This repository contains python modules and command line scripts to support testing for selective neutrality using relative likelihood. It enables application of the methods described in Simon and Huttley A New Statistical Test Provides Evidence of Selection Against Deleterious Mutations in Genes Promoting Disease Resistance (in preparation). For other software supporting that paper, but not required for applications, see https://github.com/helmutsimon/NeutralityTest.
+--------
+This repository contains python modules and command line scripts to support testing for selective neutrality using relative likelihood. It enables application of the methods described in Simon and Huttley *A New Statistical Test Provides Evidence of Selection Against Deleterious Mutations in Genes Promoting Disease Resistance* (in preparation). For other software supporting that paper, but not required for applications, see https://github.com/helmutsimon/NeutralityTest.
 
 Functions available include:
 
@@ -25,8 +25,13 @@ Functions available include:
    cli
    license
 
+Source
+------
+
+Source code is hosted at https://github.com/helmutsimon/selectiontest.
+
 Citation
-========
+--------
 For the present, cite github repository. Bibtex:
 
 ::
@@ -39,7 +44,7 @@ For the present, cite github repository. Bibtex:
     note = {[https://github.com/helmutsimon/selectiontest]}}
 
 Indices and tables
-==================
+------------------
 
 * :ref:`genindex`
 * :ref:`modindex`
