@@ -1,8 +1,20 @@
 
+
 Welcome to selectiontest's documentation!
 =========================================
 
-Contents
+Overview
+========
+This repository contains python modules and command line scripts to support testing for selective neutrality using relative likelihood. It enables application of the methods described in Simon and Huttley A New Statistical Test Provides Evidence of Selection Against Deleterious Mutations in Genes Promoting Disease Resistance (in preparation). For other software supporting that paper, but not required for applications, see https://github.com/helmutsimon/NeutralityTest.
+
+Functions available include:
+
+
+* calculate statistic for relative neutrality, :math:`{\rho }`, which is a relative likelihood of two models;
+* generate variates corresponding to the Wright-Fisher model and the \`uniform distribution\' model;
+* calculate Tajima's D (for comparison purposes);
+* calibrate :math:`{\rho }`, that is, find the threshold corresponding to a desired false positive (Type I error) rate; and
+* generate variates corresponding to a piece-wise constant demographic history.
 
 .. toctree::
    :maxdepth: 2
@@ -12,6 +24,19 @@ Contents
    modules
    cli
    license
+
+Citation
+========
+For the present, cite github repository. Bibtex:
+
+::
+
+    @misc{simon_selection,
+    author = {Simon, Helmut and Huttley, Gavin},
+    title = {selectiontest 0.0.9},
+    year = {2020},
+    url = {https://github.com/helmutsimon/selectiontest},
+    note = {[https://github.com/helmutsimon/selectiontest]}}
 
 Indices and tables
 ==================
