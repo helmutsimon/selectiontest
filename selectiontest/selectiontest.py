@@ -13,7 +13,7 @@ from scipy.stats import dirichlet
 __author__ = "Helmut Simon"
 __copyright__ = "© Copyright 2020, Helmut Simon"
 __license__ = "BSD-3"
-__version__ = "0.1.0"
+__version__ = "0.1.1"
 __maintainer__ = "Helmut Simon"
 __email__ = "helmut.simon@anu.edu.au"
 __status__ = "Test"
@@ -28,7 +28,7 @@ def get_ERM_matrix(n):
     return ERM_matrix
 
 
-def generate_wf_variates(n, reps, random_state=None):
+def sample_wf_distribution(n, reps, random_state=None):
     """
     Calculate variates for the probability distribution Q under Wright Fisher model.
 
@@ -60,7 +60,7 @@ def generate_wf_variates(n, reps, random_state=None):
     return variates
 
 
-def generate_uniform_variates(n, reps, random_state=None):
+def sample_uniform_distribution(n, reps, random_state=None):
     """
     Calculate variates for the uniform probability distribution Q.
 
@@ -131,9 +131,9 @@ def test_neutrality(sfs, variates0=None, variates1=None, reps=10000):
     """
     n = len(sfs) + 1
     if variates0 is None:
-        variates0 = generate_wf_variates(n, reps)
+        variates0 = sample_wf_distribution(n, reps)
     if variates1 is None:
-        variates1 = generate_uniform_variates(n, reps)
+        variates1 = sample_uniform_distribution(n, reps)
     h0 = np.mean(multinomial_pmf(sfs, variates0))
     h1 = np.mean(multinomial_pmf(sfs, variates1))
     if h0 == 0 or h1 == 0:
@@ -201,7 +201,7 @@ def generate_sfs_array(n, seg_sites, reps=10000):
     number of segregating sites.
 
     """
-    variates = generate_wf_variates(n, reps)
+    variates = sample_wf_distribution(n, reps)
     sfs_array = np.apply_along_axis(mul(seg_sites), 1, variates)
     return sfs_array
 
@@ -276,7 +276,7 @@ def piecewise_constant_variates(n, timepoints, pop_sizes, reps=10000):
          Array of variates
 
     """
-    variates = generate_wf_variates(n, reps)
+    variates = sample_wf_distribution(n, reps)
     branches = np.flip(variates, axis=1)
     s_k = np.cumsum(branches, axis=1)
     func1 = calc_branch_length2(pop_sizes, timepoints)
