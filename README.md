@@ -1,6 +1,6 @@
 # selectiontest
 ## Introduction
-This repository contains python modules and command line scripts to support testing for selective neutrality using relative likelihood. It enables application of the methods described in Simon and Huttley A New Statistical Test Provides Evidence of Selection Against Deleterious Mutations in Genes Promoting Disease Resistance (in preparation). For other software supporting that paper, but not required for applications, see https://github.com/helmutsimon/NeutralityTest.
+This repository contains python modules and command line scripts to support testing for selective neutrality using relative likelihood. It enables application of the methods described in Simon and Huttley *A New Statistical Test Provides Evidence of Selection Against Deleterious Mutations in Genes Promoting Disease Resistance* (in preparation). For other software supporting that paper, but not required for applications, see https://github.com/helmutsimon/NeutralityTest.
 
 Functions available include:
 * calculate statistic for relative neutrality, &rho;, which is a relative likelihood of two models;
@@ -14,4 +14,4 @@ Functions available include:
 Installation is currently from test.pypi. Use:
 python3 -m pip install --index-url https://test.pypi.org/simple/ --no-deps selectiontest-helmutsimon --upgrade
 ## Documentation
-To be advised.
+See https://selectiontest.readthedocs.io/en/latest/index.html
