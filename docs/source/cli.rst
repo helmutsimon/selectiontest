@@ -16,14 +16,12 @@ The python modules can be run from the comand line as follows:
 
     compute_threshold n seg_sites -r reps -f fpr
 
-``generate_wf_variates`` and ``generate_uniform_variates`` save output as gzipped pickle files with pathname ``outfile``.
-
-These pathnames can be suppplied to ``test_neutrality`` by using the options -q0 and -q1.
+``generate_wf_variates`` and ``generate_uniform_variates`` save output as gzipped pickle files with pathname ``outfile``. These pathnames can be supplied to ``test_neutrality`` by using the options -q0 and -q1.
 
 Note
 ----
 
-At present, there is no ommand line script for the python module piecewise_constant_variates.
+At present, there is no command line script for the python module piecewise_constant_variates.
 
 
 
