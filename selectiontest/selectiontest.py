@@ -13,7 +13,7 @@ from scipy.stats import dirichlet
 __author__ = "Helmut Simon"
 __copyright__ = "© Copyright 2020, Helmut Simon"
 __license__ = "BSD-3"
-__version__ = "0.0.9"
+__version__ = "0.1.0"
 __maintainer__ = "Helmut Simon"
 __email__ = "helmut.simon@anu.edu.au"
 __status__ = "Test"
@@ -44,7 +44,7 @@ def generate_wf_variates(n, reps, random_state=None):
     Returns
     -------
     numpy.ndarray
-         Array of variates
+         Array of variates (reps, n-1)
 
     """
     erm = get_ERM_matrix(n)
@@ -76,7 +76,7 @@ def generate_uniform_variates(n, reps, random_state=None):
     Returns
     -------
     numpy.ndarray
-         Array of variates
+         Array of variates (reps, n-1)
 
     """
     j_n = np.diag(1 / np.arange(2, n + 1))
@@ -140,7 +140,7 @@ def test_neutrality(sfs, variates0=None, variates1=None, reps=10000):
         print(sfs, 'h0 = ', h0, 'h1 = ', h1)
         if h0 != 0:
             h1 = sys.float_info.min
-    return np.log10(h0) - np.log10(h1)
+    return np.log10(h1) - np.log10(h0)
 
 
 def pi_calc(sfs):
