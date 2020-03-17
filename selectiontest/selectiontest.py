@@ -209,7 +209,7 @@ def generate_sfs_array(n, seg_sites, reps=10000):
 def compute_threshold(n, seg_sites, reps=10000, fpr=0.02):
     """
     Calculate threshold value of :math:`\\rho` corresponding to a given false positive rate (FPR).
-    For values of :math:`\\rho` below the threshold we reject the
+    For values of :math:`\\rho` above the threshold we reject the
     null (by default neutral) hypothesis.
 
     Parameters
