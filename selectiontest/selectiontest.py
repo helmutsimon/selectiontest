@@ -234,7 +234,7 @@ def compute_threshold(n, seg_sites, reps=10000, fpr=0.02):
     results = np.apply_along_axis(test_neutrality, 1, sfs_array)
     results = np.sort(results)
     results = results[~np.isnan(results)]
-    return results[int(len(results) * fpr)]
+    return results[int(len(results) * (1 - fpr))]
 
 
 def calc_breakpoints(pop_sizes, timepoints):
