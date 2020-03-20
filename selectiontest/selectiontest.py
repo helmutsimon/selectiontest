@@ -206,6 +206,13 @@ def generate_sfs_array(n, seg_sites, reps=10000):
     return sfs_array
 
 
+def test_neutrality_func(variates0=None, variates1=None, reps=10000):
+    def test_neutrality_set(sfs):
+        return test_neutrality(sfs, variates0=variates0, variates1=variates1, reps=reps)
+
+    return test_neutrality_set
+
+
 def compute_threshold(n, seg_sites, reps=10000, fpr=0.02):
     """
     Calculate threshold value of :math:`\\rho` corresponding to a given false positive rate (FPR).
@@ -230,10 +237,13 @@ def compute_threshold(n, seg_sites, reps=10000, fpr=0.02):
 
     """
 
+    variates0 = sample_wf_distribution(n, 10000)
+    variates1 = sample_uniform_distribution(n, 10000)
+    test_neutrality_set = test_neutrality_func(variates0, variates1, reps)
     sfs_array = generate_sfs_array(n, seg_sites, reps)
-    results = np.apply_along_axis(test_neutrality, 1, sfs_array)
-    results = np.sort(results)
+    results = np.apply_along_axis(test_neutrality_set, 1, sfs_array)
     results = results[~np.isnan(results)]
+    results = np.sort(results)
     return results[int(len(results) * (1 - fpr))]
 
 
