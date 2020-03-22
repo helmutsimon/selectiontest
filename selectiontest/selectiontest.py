@@ -4,7 +4,7 @@
 import numpy as np
 import sys
 from bisect import bisect
-from math import log, factorial
+from math import log10
 from scipy.special import binom
 from scipy.stats import multinomial, expon
 from scipy.stats import dirichlet
@@ -87,10 +87,12 @@ def sample_uniform_distribution(n, reps, random_state=None):
     return variates.T
 
 
-def multinomial_pmf(counts, probs):
+def quasi_pmf(counts, probs):
     """
-    Calculate PMF of multinomial distribution. Number of draws is the sum of counts.
+    Calculate a multiple of the PMF of multinomial distribution. Number of draws is the sum of counts.
     probs can be a 2D array, with each row totalling 1.
+    For efficiency, we ignore factors in the multinomial pmf that do not involve probs, as these
+    cancel out in test_neutrality.
 
     """
     xx = list()
@@ -101,10 +103,7 @@ def multinomial_pmf(counts, probs):
     counts = np.array(counts)
     xx[:, np.where(counts == 0.)] = 0.   # otherwise x will contain NaN even if count = 0
     x = np.sum(xx, axis=1)
-    y = np.sum([log(factorial(i)) for i in counts])
-    z = np.sum(np.log(np.arange(1, sum(counts) + 1)))
-    mult_prob = np.exp(x + z - y)
-    return mult_prob
+    return np.exp(x)
 
 
 def test_neutrality(sfs, variates0=None, variates1=None, reps=10000):
@@ -134,13 +133,16 @@ def test_neutrality(sfs, variates0=None, variates1=None, reps=10000):
         variates0 = sample_wf_distribution(n, reps)
     if variates1 is None:
         variates1 = sample_uniform_distribution(n, reps)
-    h0 = np.mean(multinomial_pmf(sfs, variates0))
-    h1 = np.mean(multinomial_pmf(sfs, variates1))
-    if h0 == 0 or h1 == 0:
+    h0 = np.sum(quasi_pmf(sfs, variates0))
+    h1 = np.sum(quasi_pmf(sfs, variates1))
+    # Probabilities cannot be exactly zero.
+    if h0 == 0:
         print(sfs, 'h0 = ', h0, 'h1 = ', h1)
-        if h0 != 0:
-            h1 = sys.float_info.min
-    return np.log10(h1) - np.log10(h0)
+        h0 = sys.float_info.min
+    if h1 == 0:
+        print(sfs, 'h0 = ', h0, 'h1 = ', h1)
+        h1 = sys.float_info.min
+    return log10(h1) - log10(h0)
 
 
 def pi_calc(sfs):
