@@ -13,7 +13,7 @@ from scipy.stats import dirichlet
 __author__ = "Helmut Simon"
 __copyright__ = "© Copyright 2020, Helmut Simon"
 __license__ = "BSD-3"
-__version__ = "0.1.4"
+__version__ = "0.1.5"
 __maintainer__ = "Helmut Simon"
 __email__ = "helmut.simon@anu.edu.au"
 __status__ = "Test"
@@ -235,7 +235,7 @@ def compute_threshold(n, seg_sites, reps=10000, fpr=0.02):
     Returns
     -------
     float
-        Threshold value (upper) for log odds ratio
+        Threshold value for log odds ratio
 
     """
 
