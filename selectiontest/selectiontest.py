@@ -13,7 +13,7 @@ from scipy.stats import dirichlet
 __author__ = "Helmut Simon"
 __copyright__ = "© Copyright 2020, Helmut Simon"
 __license__ = "BSD-3"
-__version__ = "0.1.6"
+__version__ = "0.1.7"
 __maintainer__ = "Helmut Simon"
 __email__ = "helmut.simon@anu.edu.au"
 __status__ = "Test"
@@ -135,12 +135,12 @@ def test_neutrality(sfs, variates0=None, variates1=None, reps=10000):
         variates1 = sample_uniform_distribution(n, reps)
     h0 = np.sum(quasi_pmf(sfs, variates0))
     h1 = np.sum(quasi_pmf(sfs, variates1))
+    errflag = (h0 == 0) | (h1 == 0)
     # Probabilities cannot be exactly zero.
     if h0 == 0:
         h0 = sys.float_info.min
     if h1 == 0:
         h1 = sys.float_info.min
-    errflag = (h0 == 0) | (h1 == 0)
     return log10(h1) - log10(h0), errflag
 
 
