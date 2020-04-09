@@ -4,7 +4,6 @@
 import numpy as np
 import sys
 from bisect import bisect
-from math import log10
 from scipy.special import binom
 from scipy.stats import multinomial, expon
 from scipy.stats import dirichlet
@@ -13,7 +12,7 @@ from scipy.stats import dirichlet
 __author__ = "Helmut Simon"
 __copyright__ = "© Copyright 2020, Helmut Simon"
 __license__ = "BSD-3"
-__version__ = "0.1.7"
+__version__ = "0.1.8"
 __maintainer__ = "Helmut Simon"
 __email__ = "helmut.simon@anu.edu.au"
 __status__ = "Test"
@@ -124,8 +123,9 @@ def test_neutrality(sfs, variates0=None, variates1=None, reps=10000):
 
     Returns
     -------
-    float
-        :math:`\\rho` (value of log odds ratio)
+    numpy.float64
+        :math:`\\rho` (value of log odds ratio). Values can include inf, -inf or nan if one or both probabilities
+        is zero due to underflow error.
 
     """
     n = len(sfs) + 1
@@ -135,13 +135,7 @@ def test_neutrality(sfs, variates0=None, variates1=None, reps=10000):
         variates1 = sample_uniform_distribution(n, reps)
     h0 = np.sum(quasi_pmf(sfs, variates0))
     h1 = np.sum(quasi_pmf(sfs, variates1))
-    errflag = (h0 == 0) | (h1 == 0)
-    # Probabilities cannot be exactly zero.
-    if h0 == 0:
-        h0 = sys.float_info.min
-    if h1 == 0:
-        h1 = sys.float_info.min
-    return log10(h1) - log10(h0), errflag
+    return np.log10(h1) - np.log10(h0)
 
 
 def pi_calc(sfs):
