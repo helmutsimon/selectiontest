@@ -112,8 +112,8 @@ def test_neutrality(sfs, variates0=None, variates1=None, reps=10000):
 
     Parameters
     ----------
-    sfs: string
-        Site frequency spectrum separated by commas, e.g. 1,3,0,2,1
+    sfs: list
+        Site frequency spectrum, e.g. [1, 3, 0, 2, 1]
     variates0: numpy array
         Array of variates from null hypothesis distribution. Default uses Wright-Fisher model.
     variates1: numpy array
@@ -158,12 +158,12 @@ def calculate_D(sfs):
 
     Parameters
     ----------
-    sfs: string
-        Site frequency spectrum separated by commas, e.g. 1,3,0,2,1
+    sfs: list
+        Site frequency spectrum, e.g. [1, 3, 0, 2, 1]
 
     Returns
     -------
-    float
+    numpy.float64
         Value of Tajima\'s D.
 
     """
@@ -227,7 +227,7 @@ def compute_threshold(n, seg_sites, reps=10000, fpr=0.02):
 
     Returns
     -------
-    float
+    numpy.float64
         Threshold value for log odds ratio
 
     """
@@ -262,15 +262,15 @@ def calc_branch_length2(pop_sizes, timepoints):
 
 def piecewise_constant_variates(n, timepoints, pop_sizes, reps=10000):
     """
-    Generate variates corresponding to a piecewise constant demographic ghistory.
+    Generate variates corresponding to a piecewise constant demographic history.
 
     Parameters
     ----------
     n: int
         Sample size
-    timepoints: float
+    timepoints: array-like
         Times at which population changes (in generations, backward from the present).
-    pop_sizes: float
+    pop_sizes: array-like
         Population sizes between timepoints (only relative sizes matter.)
     reps: int
         Number of variates to generate.
