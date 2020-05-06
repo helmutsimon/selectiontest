@@ -2,17 +2,17 @@
 
 
 import numpy as np
-import sys
 from bisect import bisect
 from scipy.special import binom
 from scipy.stats import multinomial, expon
 from scipy.stats import dirichlet
+from collections import Counter
 
 
 __author__ = "Helmut Simon"
 __copyright__ = "© Copyright 2020, Helmut Simon"
 __license__ = "BSD-3"
-__version__ = "0.1.9"
+__version__ = "0.1.10"
 __maintainer__ = "Helmut Simon"
 __email__ = "helmut.simon@anu.edu.au"
 __status__ = "Test"
@@ -292,6 +292,76 @@ def piecewise_constant_variates(n, timepoints, pop_sizes, reps=10000):
     col2.shape = (col2.shape[0], 1)
     temp1 = np.hstack([col2, temp])
     return np.flip(temp1, axis=1)
+
+
+def vcf2sfs(vcf_file, panel, chrom, start, end, select_chr=True):
+    """
+    Get SFS from vcf data for given population and sequence. The panel file is used to select probands.
+
+    Parameters
+    ----------
+    vcf_file: pyvcf class: Reader (https://pyvcf.readthedocs.io/en/latest/)
+        Variant details
+
+    panel: pandas DataFrame
+        Proband details
+
+    chrom: int
+        Chromosome
+
+    start: int
+        Start position of sequence.
+
+    end: int
+        End position of sequence.
+
+    select_chr: bool
+        If True, sample first chromosome. If false, use both.
+
+    Returns
+    -------
+    list
+        Site frequency spectrum
+
+    int
+        Sample size
+
+    list
+        Names of variants common to all elements of the sample.
+
+    """
+    n = panel.shape[0]
+    if not select_chr:
+        n = 2 * n
+    snps = vcf_file.fetch(str(chrom), start, end)
+    count, anc_count = 0, 0
+    allele_counts = list()
+    non_seg_snps = list()
+    for record in snps:
+        allele_count = 0
+        if record.is_snp:
+            count += 1
+            # Test the ancestral is one of the alleles
+            if record.INFO['AA'][0] not in [record.REF, record.ALT]:
+                continue
+            anc_count += 1
+            for proband in record.samples:
+                if proband.sample in panel.index:
+                    gt = proband.gt_alleles
+                    if select_chr:
+                        allele_count += int(gt[0])
+                    else:
+                        allele_count += int(gt[0]) + int(gt[1])
+            if allele_count < n:    #Some SNPs may not segregate in some subpopulations.
+                allele_counts.append(allele_count)
+            else:
+                non_seg_snps.append(record.ID)
+    sfs_c = Counter(allele_counts)
+    del sfs_c[0]
+    sfs = np.zeros(n - 1, int)
+    for i in sfs_c.keys():
+        sfs[i - 1] = sfs_c[i]
+    return sfs, n, non_seg_snps
 
 
 

@@ -15,6 +15,7 @@ Functions available include:
 * calculate Tajima's D (for comparison purposes);
 * calibrate :math:`{\rho }`, that is, find the threshold corresponding to a desired false positive (Type I error) rate; and
 * generate variates corresponding to a piece-wise constant demographic history.
+* compute SFS from variant data in vcf format (pyvcf class: Reader (https://pyvcf.readthedocs.io/en/latest/)
 
 .. toctree::
    :maxdepth: 2
