@@ -12,7 +12,7 @@ from scipy.stats import dirichlet
 __author__ = "Helmut Simon"
 __copyright__ = "© Copyright 2020, Helmut Simon"
 __license__ = "BSD-3"
-__version__ = "0.1.8"
+__version__ = "0.1.9"
 __maintainer__ = "Helmut Simon"
 __email__ = "helmut.simon@anu.edu.au"
 __status__ = "Test"
@@ -125,7 +125,7 @@ def test_neutrality(sfs, variates0=None, variates1=None, reps=10000):
     -------
     numpy.float64
         :math:`\\rho` (value of log odds ratio). Values can include inf, -inf or nan if one or both probabilities
-        is zero due to underflow error.
+        are zero due to underflow error.
 
     """
     n = len(sfs) + 1
