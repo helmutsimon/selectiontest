@@ -16,9 +16,9 @@ For the command line interface, sfs is entered as a string of integers separated
 
 For more information, use ``cli --help'', ``cli test-neutrality --help'' etc.
 
-In addition, there is a command cli test_neutrality-from-vcf to calculate :math:`{\rho }` directly from VCF data, combining the modules vcf2sfs and test_neutrality. 
+In addition, there is a command cli test-neutrality-from-vcf to calculate :math:`{\rho }` directly from VCF data, combining the modules vcf2sfs and test_neutrality. 
 
-For details use command ``cli test_neutrality-from-vcf --help''.
+For details use command ``cli test-neutrality-from-vcf --help''.
 
 This requires vcf data and panel (proband) details in the format used by the 1000 Genomes Project at ftp://ftp.1000genomes.ebi.ac.uk/vol1/ftp/release/20130502/.
 
