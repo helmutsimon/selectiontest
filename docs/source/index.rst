@@ -39,7 +39,7 @@ For the present, cite github repository. Bibtex:
 
     @misc{simon_selection,
     author = {Simon, Helmut and Huttley, Gavin},
-    title = {selectiontest 0.0.9},
+    title = {selectiontest 0.1.10},
     year = {2020},
     url = {https://github.com/helmutsimon/selectiontest},
     note = {[https://github.com/helmutsimon/selectiontest]}}

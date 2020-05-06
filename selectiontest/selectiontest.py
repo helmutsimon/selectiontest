@@ -12,7 +12,7 @@ from collections import Counter
 __author__ = "Helmut Simon"
 __copyright__ = "© Copyright 2020, Helmut Simon"
 __license__ = "BSD-3"
-__version__ = "0.1.10"
+__version__ = "0.1.11"
 __maintainer__ = "Helmut Simon"
 __email__ = "helmut.simon@anu.edu.au"
 __status__ = "Test"
@@ -316,7 +316,7 @@ def vcf2sfs(vcf_file, panel, chrom, start, end, select_chr=True):
         End position of sequence.
 
     select_chr: bool
-        If True, sample first chromosome. If false, use both.
+        If True, sample first chromosome. If False, use both.
 
     Returns
     -------
@@ -362,6 +362,10 @@ def vcf2sfs(vcf_file, panel, chrom, start, end, select_chr=True):
     for i in sfs_c.keys():
         sfs[i - 1] = sfs_c[i]
     return sfs, n, non_seg_snps
+
+
+
+
 
 
 
