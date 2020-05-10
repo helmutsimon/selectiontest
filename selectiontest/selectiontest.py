@@ -12,7 +12,7 @@ from collections import Counter
 __author__ = "Helmut Simon"
 __copyright__ = "© Copyright 2020, Helmut Simon"
 __license__ = "BSD-3"
-__version__ = "0.1.11"
+__version__ = "0.1.12"
 __maintainer__ = "Helmut Simon"
 __email__ = "helmut.simon@anu.edu.au"
 __status__ = "Test"
@@ -190,13 +190,13 @@ def mul(seg_sites):
     return multinom
 
 
-def generate_sfs_array(n, seg_sites, reps=10000):
+def generate_sfs_array(n, seg_sites, reps=10000, random_state=None):
     """
     Sample SFS values for Wright-Fisher model for given sample size n and conditioned on the
     number of segregating sites.
 
     """
-    variates = sample_wf_distribution(n, reps)
+    variates = sample_wf_distribution(n, reps, random_state)
     sfs_array = np.apply_along_axis(mul(seg_sites), 1, variates)
     return sfs_array
 
@@ -208,7 +208,7 @@ def test_neutrality_func(variates0=None, variates1=None, reps=10000):
     return test_neutrality_set
 
 
-def compute_threshold(n, seg_sites, reps=10000, fpr=0.02):
+def compute_threshold(n, seg_sites, reps=10000, fpr=0.02, random_state=None):
     """
     Calculate threshold value of :math:`\\rho` corresponding to a given false positive rate (FPR).
     For values of :math:`\\rho` above the threshold we reject the
@@ -232,8 +232,8 @@ def compute_threshold(n, seg_sites, reps=10000, fpr=0.02):
 
     """
 
-    variates0 = sample_wf_distribution(n, 10000)
-    variates1 = sample_uniform_distribution(n, 10000)
+    variates0 = sample_wf_distribution(n, 10000, random_state=random_state)
+    variates1 = sample_uniform_distribution(n, 10000, random_state=random_state)
     test_neutrality_set = test_neutrality_func(variates0, variates1, reps)
     sfs_array = generate_sfs_array(n, seg_sites, reps)
     results = np.apply_along_axis(test_neutrality_set, 1, sfs_array)
