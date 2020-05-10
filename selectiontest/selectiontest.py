@@ -12,7 +12,7 @@ from collections import Counter
 __author__ = "Helmut Simon"
 __copyright__ = "© Copyright 2020, Helmut Simon"
 __license__ = "BSD-3"
-__version__ = "0.1.12"
+__version__ = "0.1.13"
 __maintainer__ = "Helmut Simon"
 __email__ = "helmut.simon@anu.edu.au"
 __status__ = "Test"
@@ -183,9 +183,9 @@ def calculate_D(sfs):
     return tajD
 
 
-def mul(seg_sites):
+def mul(seg_sites, random_state=None):
     def multinom(p):
-        return multinomial.rvs(seg_sites, p)
+        return multinomial.rvs(seg_sites, p, random_state=random_state)
 
     return multinom
 
@@ -197,7 +197,7 @@ def generate_sfs_array(n, seg_sites, reps=10000, random_state=None):
 
     """
     variates = sample_wf_distribution(n, reps, random_state)
-    sfs_array = np.apply_along_axis(mul(seg_sites), 1, variates)
+    sfs_array = np.apply_along_axis(mul(seg_sites, random_state=random_state), 1, variates)
     return sfs_array
 
 
