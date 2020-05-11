@@ -4,8 +4,6 @@
 import numpy as np
 from bisect import bisect
 from scipy.special import binom
-from scipy.stats import multinomial, expon
-from scipy.stats import dirichlet
 from collections import Counter
 
 
@@ -27,7 +25,7 @@ def get_ERM_matrix(n):
     return ERM_matrix
 
 
-def sample_wf_distribution(n, reps, random_state=None):
+def sample_wf_distribution(n, reps):
     """
     Calculate variates for the probability distribution Q under Wright Fisher model.
 
@@ -37,8 +35,6 @@ def sample_wf_distribution(n, reps, random_state=None):
         Sample size
     reps: int
         Number of variates to generate if default is used.
-    random_state: int
-        Seed for local RandomState instance for sampling exponential distribution (used for unit testing).
 
     Returns
     -------
@@ -48,7 +44,7 @@ def sample_wf_distribution(n, reps, random_state=None):
     """
     erm = get_ERM_matrix(n)
     kvec = np.arange(2, n + 1, dtype=int)
-    branch_lengths = expon.rvs(scale=1 / binom(kvec, 2), size=(reps, n - 1), random_state=random_state)
+    branch_lengths = np.random.exponential(scale=1 / binom(kvec, 2), size=(reps, n - 1))
     total_branch_lengths = branch_lengths @ kvec
     rel_branch_lengths = list()
     for row, total_length in zip(branch_lengths, total_branch_lengths):
@@ -59,7 +55,7 @@ def sample_wf_distribution(n, reps, random_state=None):
     return variates
 
 
-def sample_uniform_distribution(n, reps, random_state=None):
+def sample_uniform_distribution(n, reps):
     """
     Calculate variates for the uniform probability distribution Q.
 
@@ -69,8 +65,6 @@ def sample_uniform_distribution(n, reps, random_state=None):
         Sample size
     reps: int
         Number of variates to generate if default is used.
-    random_state: int
-        Seed for local RandomState instance for sampling Dirichlet distribution (used for unit testing).
 
     Returns
     -------
@@ -81,7 +75,7 @@ def sample_uniform_distribution(n, reps, random_state=None):
     j_n = np.diag(1 / np.arange(2, n + 1))
     erm = get_ERM_matrix(n)
     avge_mx = erm.dot(j_n)
-    sample = dirichlet.rvs(np.ones(n - 1), size=reps, random_state=random_state)
+    sample = np.random.Generator.dirichlet(np.ones(n - 1), size=reps)
     variates = avge_mx @ sample.T
     return variates.T
 
@@ -183,21 +177,21 @@ def calculate_D(sfs):
     return tajD
 
 
-def mul(seg_sites, random_state=None):
+def mul(seg_sites):
     def multinom(p):
-        return multinomial.rvs(seg_sites, p, random_state=random_state)
+        return np.random.multinomial(seg_sites, p)
 
     return multinom
 
 
-def generate_sfs_array(n, seg_sites, reps=10000, random_state=None):
+def generate_sfs_array(n, seg_sites, reps=10000):
     """
     Sample SFS values for Wright-Fisher model for given sample size n and conditioned on the
     number of segregating sites.
 
     """
-    variates = sample_wf_distribution(n, reps, random_state)
-    sfs_array = np.apply_along_axis(mul(seg_sites, random_state=random_state), 1, variates)
+    variates = sample_wf_distribution(n, reps)
+    sfs_array = np.apply_along_axis(mul(seg_sites), 1, variates)
     return sfs_array
 
 
@@ -208,7 +202,7 @@ def test_neutrality_func(variates0=None, variates1=None, reps=10000):
     return test_neutrality_set
 
 
-def compute_threshold(n, seg_sites, reps=10000, fpr=0.02, random_state=None):
+def compute_threshold(n, seg_sites, reps=10000, fpr=0.02):
     """
     Calculate threshold value of :math:`\\rho` corresponding to a given false positive rate (FPR).
     For values of :math:`\\rho` above the threshold we reject the
@@ -224,8 +218,6 @@ def compute_threshold(n, seg_sites, reps=10000, fpr=0.02, random_state=None):
         Number of variates to generate if default is used.
     fpr: float
         Selected FPR tolerance.
-    random_state: int
-        Seed for local RandomState instances in called functions (used for unit testing).
 
     Returns
     -------
@@ -234,10 +226,10 @@ def compute_threshold(n, seg_sites, reps=10000, fpr=0.02, random_state=None):
 
     """
 
-    variates0 = sample_wf_distribution(n, 10000, random_state=random_state)
-    variates1 = sample_uniform_distribution(n, 10000, random_state=random_state)
+    variates0 = sample_wf_distribution(n, 10000)
+    variates1 = sample_uniform_distribution(n, 10000)
     test_neutrality_set = test_neutrality_func(variates0, variates1, reps)
-    sfs_array = generate_sfs_array(n, seg_sites, reps, random_state=random_state)
+    sfs_array = generate_sfs_array(n, seg_sites, reps)
     results = np.apply_along_axis(test_neutrality_set, 1, sfs_array)
     results = results[~np.isnan(results)]
     results = np.sort(results)
