@@ -12,7 +12,7 @@ from collections import Counter
 __author__ = "Helmut Simon"
 __copyright__ = "© Copyright 2020, Helmut Simon"
 __license__ = "BSD-3"
-__version__ = "0.1.13"
+__version__ = "0.1.14"
 __maintainer__ = "Helmut Simon"
 __email__ = "helmut.simon@anu.edu.au"
 __status__ = "Test"
@@ -38,7 +38,7 @@ def sample_wf_distribution(n, reps, random_state=None):
     reps: int
         Number of variates to generate if default is used.
     random_state: int
-        Value used to seed local RandomState instance for generating variates from exponential distribution.
+        Seed for local RandomState instance for sampling exponential distribution (used for unit testing).
 
     Returns
     -------
@@ -70,7 +70,7 @@ def sample_uniform_distribution(n, reps, random_state=None):
     reps: int
         Number of variates to generate if default is used.
     random_state: int
-        Value used to seed local RandomState instance for generating variates from Dirichlet distribution.
+        Seed for local RandomState instance for sampling Dirichlet distribution (used for unit testing).
 
     Returns
     -------
@@ -224,6 +224,8 @@ def compute_threshold(n, seg_sites, reps=10000, fpr=0.02, random_state=None):
         Number of variates to generate if default is used.
     fpr: float
         Selected FPR tolerance.
+    random_state: int
+        Seed for local RandomState instances in called functions (used for unit testing).
 
     Returns
     -------
@@ -235,7 +237,7 @@ def compute_threshold(n, seg_sites, reps=10000, fpr=0.02, random_state=None):
     variates0 = sample_wf_distribution(n, 10000, random_state=random_state)
     variates1 = sample_uniform_distribution(n, 10000, random_state=random_state)
     test_neutrality_set = test_neutrality_func(variates0, variates1, reps)
-    sfs_array = generate_sfs_array(n, seg_sites, reps)
+    sfs_array = generate_sfs_array(n, seg_sites, reps, random_state=random_state)
     results = np.apply_along_axis(test_neutrality_set, 1, sfs_array)
     results = results[~np.isnan(results)]
     results = np.sort(results)
