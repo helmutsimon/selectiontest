@@ -10,7 +10,7 @@ from collections import Counter
 __author__ = "Helmut Simon"
 __copyright__ = "© Copyright 2020, Helmut Simon"
 __license__ = "BSD-3"
-__version__ = "0.1.14"
+__version__ = "0.1.16"
 __maintainer__ = "Helmut Simon"
 __email__ = "helmut.simon@anu.edu.au"
 __status__ = "Test"
@@ -75,7 +75,7 @@ def sample_uniform_distribution(n, reps):
     j_n = np.diag(1 / np.arange(2, n + 1))
     erm = get_ERM_matrix(n)
     avge_mx = erm.dot(j_n)
-    sample = np.random.Generator.dirichlet(np.ones(n - 1), size=reps)
+    sample = np.random.dirichlet(np.ones(n - 1), size=reps)
     variates = avge_mx @ sample.T
     return variates.T
 
