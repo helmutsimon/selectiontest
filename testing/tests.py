@@ -17,7 +17,7 @@ from click.testing import CliRunner
 __author__ = "Helmut Simon"
 __copyright__ = "Copyright 2020, Helmut Simon"
 __license__ = "GPL"
-__version__ = "0.0.3"
+__version__ = "0.0.4"
 __email__ = "helmut.simon@anu.edu.au"
 __status__ = "Test"
 
@@ -92,7 +92,8 @@ class Test_wf_distribution(TestCase):
             , [0.37366753, 0.24777493, 0.19706648, 0.18149106]]
 
     def test_sample_wf_distribution(self):
-        x = sample_wf_distribution(5, 10, random_state=7)
+        random.seed(7)
+        x = sample_wf_distribution(5, 10)
         assert_allclose(x, self.result, err_msg="Failed test_sample_wf_distribution")
 
 
@@ -111,7 +112,8 @@ class Test_uniform_distribution(TestCase):
            [0.46740108, 0.19488643, 0.17406816, 0.16364433]]
 
     def test_sample_uniform_distribution(self):
-        x = sample_uniform_distribution(5, 10, random_state=11)
+        random.seed(11)
+        x = sample_uniform_distribution(5, 10)
         assert_allclose(x, self.result, err_msg="Failed test_sample_uniform_distribution", atol=1e-5)
 
 
@@ -140,34 +142,38 @@ class Test_compute_threshold(TestCase):
     def __init__(self):
         self.n = 5
         self.seg_sites = 11
-        self.threshold = 0.3894822695822897
-        self.threshold_fpr = 0.4484843725875869
-        self.fpr = 0.05
-        self.sfs_array =    array([[5, 2, 1, 3],
-                                   [5, 1, 2, 3],
-                                   [5, 2, 1, 3],
-                                   [6, 4, 1, 0],
-                                   [6, 1, 1, 3],
-                                   [6, 1, 1, 3],
-                                   [9, 2, 0, 0],
-                                   [6, 5, 0, 0],
-                                   [5, 2, 1, 3],
-                                   [7, 4, 0, 0]])
+        self.threshold = 0.45336890179930120
+        self.threshold_fpr = 0.203067434354744230
+        self.threshold_cli = 0.47588892627212176
+        self.fpr = 0.2
+        self.sfs_array = [[4, 5, 1, 1],
+                          [6, 2, 2, 1],
+                          [4, 1, 4, 2],
+                          [4, 5, 2, 0],
+                          [5, 5, 0, 1],
+                          [8, 3, 0, 0],
+                          [6, 5, 0, 0],
+                          [6, 3, 0, 2],
+                          [6, 4, 0, 1],
+                          [7, 2, 1, 1]]
 
     def test_generate_sfs_array(self):
         random.seed = 13
-        x = generate_sfs_array(self.n, self.seg_sites, reps=10, random_state=13)
+        x = generate_sfs_array(self.n, self.seg_sites, reps=10)
         rowsums = x.sum(axis=1)
         assert all(rowsums == self.seg_sites), "Failed test of compute_threshold (row sums of seg sites)."
         assert all(x == self.sfs_array), "Failed test of compute_threshold (generate sfs)."
 
     def test_compute_threshold(self):
-        y = compute_threshold(self.n, self.seg_sites, reps=10, random_state=13)
+        random.seed = 13
+        y = compute_threshold(self.n, self.seg_sites, reps=10)
         assert isclose(y, self.threshold), "Failed test of compute_threshold." + str(y) + str(self.threshold)
 
     def test_compute_threshold_fpr(self):
-        y = compute_threshold(self.n, self.seg_sites, reps=10, fpr = self.fpr, random_state=5)
-        assert isclose(y, self.threshold_fpr), "Failed test of compute_threshold." + str(y) + str(self.threshold)
+        random.seed = 5
+        y = compute_threshold(self.n, self.seg_sites, reps=10, fpr=self.fpr)
+        assert isclose(y, self.threshold_fpr), "Failed test of compute_threshold (fpr=0.2)." + str(y) + \
+                                               str(self.threshold_fpr)
 
     def test_compute_threshold_cli(self):
         args = [str(self.n), str(self.seg_sites)]
@@ -179,8 +185,8 @@ class Test_compute_threshold(TestCase):
         result = runner.invoke(selectiontestcli, args=args)
         assert result.exit_code == 0, "Exit code = %s" % result.exit_code
         threshold = float(result.output)
-        assert isinstance(threshold, float), "Threshold is not float" + str(threshold)
-        assert isfinite(threshold), "Threshold is not finite" + str(threshold)
+        assert isclose(threshold, self.threshold_cli), "Failed test of compute_threshold (cli)." + str(threshold) + \
+                                               str(self.threshold_cli)
 
 
 def main():
