@@ -5,7 +5,7 @@ with open("README.md", "r") as fh:
     long_description = fh.read()
 
 setuptools.setup(
-    name="selectiontest-helmutsimon", 
+    name="selectiontest",
     version=__version__,
     author="Helmut Simon",
     author_email="helmut.simon@anu.edu.au",
@@ -13,10 +13,9 @@ setuptools.setup(
     long_description=long_description,
     long_description_content_type="text/markdown",
     url="https://github.com/helmutsimon/SelectionTest",
-    packages=setuptools.find_packages(),
-    py_modules=['cli'],
-    install_requires=['Click', 'numpy', 'scipy'],
-    #scripts=['bin/calc_TajD', 'bin/sample_wf_distribution', 'bin/sample_uniform_distribution', 'bin/test_neutrality', 'bin/compute_threshold'],
+    packages=["selectiontest"],
+    package_dir={"selectiontest": "selectiontest"},
+    install_requires=['click', 'numpy', 'scipy'],
     classifiers=[
         "Programming Language :: Python :: 3",
         "License :: OSI Approved :: BSD License",
@@ -25,6 +24,6 @@ setuptools.setup(
     python_requires='>=3.6',
     entry_points='''
     [console_scripts]
-        cli = cli:selectiontestcli
+        cli = stcli:selectiontestcli
         '''
 )

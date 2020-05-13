@@ -2,9 +2,9 @@
 
 
 import os
+import sys
 from cogent3.util.unit_test import TestCase, main
 from numpy.testing import assert_allclose
-from cli import selectiontestcli
 from selectiontest import selectiontest
 from selectiontest.selectiontest import calculate_D, sample_wf_distribution, sample_uniform_distribution
 from selectiontest.selectiontest import test_neutrality, generate_sfs_array, compute_threshold
@@ -18,14 +18,17 @@ from click.testing import CliRunner
 __author__ = "Helmut Simon"
 __copyright__ = "Copyright 2020, Helmut Simon"
 __license__ = "GPL"
-__version__ = "0.0.4"
+__version__ = "0.0.5"
 __email__ = "helmut.simon@anu.edu.au"
 __status__ = "Test"
 
 
 abspath = os.path.abspath(__file__)
-projdir = "/".join(abspath.split("/")[:-1]) + '/data'
+projdir = "/".join(abspath.split("/")[:-2]) + '/selectiontest'
 print(projdir)
+sys.path.append(projdir)
+from stcli import selectiontestcli
+projdir = projdir + '/testing/data'
 
 
 def compute_sfs(variant_array):
