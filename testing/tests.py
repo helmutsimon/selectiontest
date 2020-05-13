@@ -24,7 +24,8 @@ __status__ = "Test"
 
 
 abspath = os.path.abspath(__file__)
-projdir = "/".join(abspath.split("/")[:-1])
+projdir = "/".join(abspath.split("/")[:-1]) + '/data'
+print(projdir)
 
 
 def compute_sfs(variant_array):
