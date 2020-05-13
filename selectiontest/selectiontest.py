@@ -5,16 +5,17 @@ import numpy as np
 from bisect import bisect
 from scipy.special import binom
 from collections import Counter
+from selectiontest.__init__ import __version__
 
 
 __author__ = "Helmut Simon"
 __copyright__ = "© Copyright 2020, Helmut Simon"
 __license__ = "BSD-3"
-__version__ = "0.1.17"
+#__version__ = "0.1.16"
+__version__ = __version__
 __maintainer__ = "Helmut Simon"
 __email__ = "helmut.simon@anu.edu.au"
 __status__ = "Test"
-
 
 
 def get_ERM_matrix(n):

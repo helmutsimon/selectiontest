@@ -1,5 +1,5 @@
 import setuptools
-from selectiontest.selectiontest import __version__
+from selectiontest.__init__ import __version__
 
 with open("README.md", "r") as fh:
     long_description = fh.read()
@@ -7,6 +7,7 @@ with open("README.md", "r") as fh:
 setuptools.setup(
     name="selectiontest",
     version=__version__,
+    #version="0.1.16",
     author="Helmut Simon",
     author_email="helmut.simon@anu.edu.au",
     description="A test for selective neutrality using relative likelihood",
@@ -27,3 +28,4 @@ setuptools.setup(
         cli = stcli:selectiontestcli
         '''
 )
+
