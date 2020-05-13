@@ -8,8 +8,9 @@ from cli import selectiontestcli
 from selectiontest import selectiontest
 from selectiontest.selectiontest import calculate_D, sample_wf_distribution, sample_uniform_distribution
 from selectiontest.selectiontest import test_neutrality, generate_sfs_array, compute_threshold
+from selectiontest.selectiontest import piecewise_constant_variates
 from pandas import read_csv, options
-from numpy import isclose, sum, array, all, random, isfinite
+from numpy import isclose, sum, array, all, random
 from collections import Counter
 from click.testing import CliRunner
 
@@ -24,9 +25,6 @@ __status__ = "Test"
 
 abspath = os.path.abspath(__file__)
 projdir = "/".join(abspath.split("/")[:-1])
-
-
-from cli import selectiontestcli
 
 
 def compute_sfs(variant_array):
@@ -52,9 +50,7 @@ class TestTajima(TestCase):
     options.mode.chained_assignment = None
 
     def __init__(self):
-        # Need to put the data in github
-        path = '/Users/helmutsimon/Google Drive/Genetics/Bayes SFS/Neutrality test'
-        berwick = read_csv(path + '/berwick_tajima_data.csv', header=None)
+        berwick = read_csv('berwick_tajima_data.csv', header=None)
         variant_array = berwick.iloc[2:]
         variant_array.drop(variant_array.columns[[-1, ]], axis=1, inplace=True)
         variant_array = variant_array.reset_index(drop=True)
@@ -90,9 +86,9 @@ class Test_wf_distribution(TestCase):
             , [0.39618915, 0.24045628, 0.19744864, 0.16590593]
             , [0.60662475, 0.18794874, 0.12206768, 0.08335883]
             , [0.37366753, 0.24777493, 0.19706648, 0.18149106]]
+        random.seed(7)
 
     def test_sample_wf_distribution(self):
-        random.seed(7)
         x = sample_wf_distribution(5, 10)
         assert_allclose(x, self.result, err_msg="Failed test_sample_wf_distribution")
 
@@ -110,9 +106,9 @@ class Test_uniform_distribution(TestCase):
            [0.8397336 , 0.11600754, 0.03965138, 0.00460748],
            [0.73013953, 0.13813067, 0.07873048, 0.05299932],
            [0.46740108, 0.19488643, 0.17406816, 0.16364433]]
+        random.seed(11)
 
     def test_sample_uniform_distribution(self):
-        random.seed(11)
         x = sample_uniform_distribution(5, 10)
         assert_allclose(x, self.result, err_msg="Failed test_sample_uniform_distribution", atol=1e-5)
 
@@ -121,16 +117,15 @@ class Test_test_neutrality(TestCase):
     def __init__(self):
         self.sfs = [1, 1, 3, 0, 7, 0]
         self.result = -1.1955828464862277
+        random.seed(3)
 
     def test_test_neutrality(self):
-        random.seed(3)
         rho = test_neutrality(self.sfs)
         assert isclose(rho, self.result), "Failed test of test_neutrality." + str(rho) + str(self.result)
 
     def test_test_neutrality_cli(self):
         args = [str(x) for x in self.sfs]
         args.insert(0, 'test-neutrality')
-        random.seed(3)
         runner = CliRunner()
         result = runner.invoke(selectiontestcli, args=args)
         rho = float(result.output)
@@ -189,6 +184,27 @@ class Test_compute_threshold(TestCase):
                                                str(self.threshold_cli)
 
 
+class Test_piecewise_constant_variates(TestCase):
+    def __init__(self):
+        self.pop_sizes = [6.6e3, 3.3e3, 1e4]
+        self.timepoints = [0, 500, 1500]
+        self.n = 8
+        self.result =  [[0.45898629, 0.21355064, 0.1169868, 0.07627143, 0.05515954, 0.04375718, 0.03528812],
+                        [0.25210652, 0.18423678, 0.15070733, 0.12720563, 0.1093255, 0.09465945, 0.08175879],
+                        [0.39613334, 0.22683027, 0.14269265, 0.08889178, 0.05778647, 0.04429444, 0.04337104],
+                        [0.4254658, 0.20647296, 0.11960824, 0.08119001, 0.0623625, 0.05439784, 0.05050266],
+                        [0.60869031, 0.20987521, 0.08070361, 0.03428861, 0.02310852, 0.02199938, 0.02133437],
+                        [0.46045233, 0.18421326, 0.09989918, 0.07641279, 0.06575486, 0.05920086, 0.05406672],
+                        [0.49890337, 0.20427012, 0.11912146, 0.07387795, 0.04531756, 0.03029366, 0.02821588],
+                        [0.37012501, 0.20702076, 0.132874, 0.09335331, 0.07234569, 0.06238468, 0.06189656],
+                        [0.38093062, 0.23034564, 0.15393881, 0.10171443, 0.06660777, 0.04249526, 0.02396747],
+                        [0.39229114, 0.22397752, 0.14378839, 0.09525381, 0.06465883, 0.04516785, 0.03486247]]
+        random.seed = 2
+
+    def test_piecewise_constant_variates(self):
+        result = piecewise_constant_variates(self.n, self.timepoints, self.pop_sizes, reps=10)
+        assert_allclose(result, self.result, err_msg="Failed test of piecewise_constant_variates.", atol=1e-5)
+
 def main():
     TestTajima().test_Tajima_module()
     TestTajima().test_Tajima_cli()
@@ -200,6 +216,7 @@ def main():
     Test_compute_threshold().test_compute_threshold()
     Test_compute_threshold().test_compute_threshold_fpr()
     Test_compute_threshold().test_compute_threshold_cli()
+    Test_piecewise_constant_variates().test_piecewise_constant_variates()
     print("All tests for selectiontest version:", selectiontest.__version__,  "complete.")
 
 
