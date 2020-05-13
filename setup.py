@@ -7,7 +7,6 @@ with open("README.md", "r") as fh:
 setuptools.setup(
     name="selectiontest",
     version=__version__,
-    #version="0.1.16",
     author="Helmut Simon",
     author_email="helmut.simon@anu.edu.au",
     description="A test for selective neutrality using relative likelihood",
@@ -16,7 +15,7 @@ setuptools.setup(
     url="https://github.com/helmutsimon/SelectionTest",
     packages=["selectiontest"],
     package_dir={"selectiontest": "selectiontest"},
-    install_requires=['click', 'numpy', 'scipy'],
+    install_requires=['click', 'numpy', 'scipy', 'pandas', 'pysam', 'PyVCF'],
     classifiers=[
         "Programming Language :: Python :: 3",
         "License :: OSI Approved :: BSD License",
