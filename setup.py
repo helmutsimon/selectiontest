@@ -16,6 +16,13 @@ setuptools.setup(
     packages=["selectiontest"],
     package_dir={"selectiontest": "selectiontest"},
     install_requires=['click', 'numpy', 'scipy', 'pandas', 'pysam', 'PyVCF'],
+    extras_require={
+            "dev": [
+                "pytest",
+                "sphinx",
+                "cogent3",
+            ],
+    },
     classifiers=[
         "Programming Language :: Python :: 3",
         "License :: OSI Approved :: BSD License",
