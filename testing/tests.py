@@ -13,14 +13,18 @@ from pandas import read_csv, options
 from numpy import isclose, sum, array, all, random
 from collections import Counter
 from click.testing import CliRunner
+from selectiontest.__init__ import __version__
 
 
 __author__ = "Helmut Simon"
-__copyright__ = "Copyright 2020, Helmut Simon"
-__license__ = "GPL"
-__version__ = "0.0.5"
+__copyright__ = "© Copyright 2020, Helmut Simon"
+__license__ = "BSD-3"
+__version__ = __version__
+__maintainer__ = "Helmut Simon"
 __email__ = "helmut.simon@anu.edu.au"
 __status__ = "Test"
+
+
 
 
 abspath = os.path.abspath(__file__)

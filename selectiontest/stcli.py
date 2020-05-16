@@ -4,6 +4,16 @@ import pandas as pd
 import pysam
 from vcf import Reader        # https://pypi.org/project/PyVCF/
 from selectiontest import selectiontest
+from selectiontest.__init__ import __version__
+
+
+__author__ = "Helmut Simon"
+__copyright__ = "© Copyright 2020, Helmut Simon"
+__license__ = "BSD-3"
+__version__ = __version__
+__maintainer__ = "Helmut Simon"
+__email__ = "helmut.simon@anu.edu.au"
+__status__ = "Test"
 
 
 @click.group()
