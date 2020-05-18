@@ -8,10 +8,11 @@ from numpy.testing import assert_allclose
 from selectiontest import selectiontest
 from selectiontest.selectiontest import calculate_D, sample_wf_distribution, sample_uniform_distribution
 from selectiontest.selectiontest import test_neutrality, generate_sfs_array, compute_threshold
-from selectiontest.selectiontest import piecewise_constant_variates
+from selectiontest.selectiontest import piecewise_constant_variates, vcf2sfs
 from pandas import read_csv, options
 from numpy import isclose, sum, array, all, random
 from collections import Counter
+from vcf import Reader        # https://pypi.org/project/PyVCF/
 from click.testing import CliRunner
 from selectiontest.__init__ import __version__
 
@@ -29,10 +30,9 @@ __status__ = "Test"
 
 abspath = os.path.abspath(__file__)
 projdir = "/".join(abspath.split("/")[:-2]) + '/selectiontest'
-print(projdir)
 sys.path.append(projdir)
 from stcli import selectiontestcli
-projdir = projdir + '/testing/data'
+projdir = "/".join(abspath.split("/")[:-2]) + '/testing/data'
 
 
 def compute_sfs(variant_array):
@@ -179,10 +179,7 @@ class Test_compute_threshold(TestCase):
                                                str(self.threshold_fpr)
 
     def test_compute_threshold_cli(self):
-        args = [str(self.n), str(self.seg_sites)]
-        args.insert(0, 'compute-threshold')
-        args.append('-r')
-        args.append(str(10))
+        args = ['compute-threshold', str(self.n), str(self.seg_sites), '-r', '10']
         random.seed = 3
         runner = CliRunner()
         result = runner.invoke(selectiontestcli, args=args)
@@ -213,6 +210,41 @@ class Test_piecewise_constant_variates(TestCase):
         result = piecewise_constant_variates(self.n, self.timepoints, self.pop_sizes, reps=10)
         assert_allclose(result, self.result, err_msg="Failed test of piecewise_constant_variates.", atol=1e-5)
 
+class Test_vcf2sfs(TestCase):
+    def __init__(self):
+        self.filename = projdir + '/chr1vcftest.gz'
+        self.panelname = projdir + '/testpanel.panel'
+        self.vcf_file = Reader(filename=projdir + '/chr1vcftest.gz', compressed=True, encoding='utf-8')
+        self.panel = read_csv(projdir + '/testpanel.panel', sep=None, engine='python', skipinitialspace=True, index_col=0)
+        self.chrom = '1'
+        self.start = 159173097
+        self.end = 159176290
+        self.result = ((array([3, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+                               0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+                               0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+                               0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+                               0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]), 108, ['rs2814778']))
+        self.rho = 0.9864313429651763
+
+
+
+    def test_vcf2sfs(self):
+        vcf_file = Reader(filename=self.filename, compressed=True, encoding='utf-8')
+        panel = read_csv(self.panelname, sep=None, engine='python', skipinitialspace=True, index_col=0)
+        panel = panel[panel['pop'] == 'YRI']
+        result = vcf2sfs(vcf_file, panel, self.chrom, self.start, self.end, select_chr=True)
+        assert all(self.result[0] == result[0]), "Failed test of vcf2sfs (sfs)"
+        assert all(self.result[1] == result[1]), "Failed test of vcf2sfs (sample size)"
+        assert all(self.result[2] == result[2]), "Failed test of vcf2sfs (common variant)"
+
+    def test_vcf2sfs_cli(self):
+        args = ['test-neutrality-from-vcf', self.filename, self.panelname, self.chrom, str(self.start),
+                str(self.end), '--sel', 'pop', 'YRI']
+        runner = CliRunner()
+        result = runner.invoke(selectiontestcli, args=args)
+        assert result.exit_code == 0, "Exit code = %s" % result.exit_code
+        assert isclose(float(result.output), self.rho), "Failed test-neutrality-from-vcf (cli)" + str(self.rho)
+
 def main():
     TestTajima().test_Tajima_module()
     TestTajima().test_Tajima_cli()
@@ -225,6 +257,8 @@ def main():
     Test_compute_threshold().test_compute_threshold_fpr()
     Test_compute_threshold().test_compute_threshold_cli()
     Test_piecewise_constant_variates().test_piecewise_constant_variates()
+    Test_vcf2sfs().test_vcf2sfs()
+    Test_vcf2sfs().test_vcf2sfs_cli()
     print("All tests for selectiontest version:", selectiontest.__version__,  "complete.")
 
 

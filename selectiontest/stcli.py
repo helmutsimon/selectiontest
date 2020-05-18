@@ -57,19 +57,16 @@ def compute_threshold(n, seg_sites, reps, fpr):
 @click.argument('chrom', type=int)
 @click.argument('start', type=int)
 @click.argument('end', type=int)
-@click.option('-p', '--pop', default=None, help='Select population')
-@click.option('-sp', '--superpop', default=None, help='Select super-population')
+@click.option('--sel', type=(str, str), default=(None, None), help='Select from panel column (column name, value)')
 @click.option('-r', '--reps', default=10000, help='Number of samples for Monte Carlo integration.')
 @click.option('-s', '--select_chr', default=True, type=bool)
-def test_neutrality_from_vcf(vcf_name, panel_name, chrom, start, end, pop, superpop, reps, select_chr):
+def test_neutrality_from_vcf(vcf_name, panel_name, chrom, start, end, sel, reps, select_chr):
     """Calculate the log odds ratio of the data computer from pPyVCF file VCF_NAME, proband details PANEL_NAME and
     region defined by CHROM, START and END."""
     vcf_file = Reader(filename=vcf_name, compressed=True, encoding='utf-8')
     panel = pd.read_csv(panel_name, sep=None, engine='python', skipinitialspace=True, index_col=0)
-    if pop is not None:
-        panel = panel[panel['pop'] == pop]
-    if superpop is not None:
-        panel = panel[panel['super_pop'] == superpop]
+    if sel != (None, None):
+        panel = panel[panel[sel[0]] == sel[1]]
     sfs, n, non_seg_snps = selectiontest.vcf2sfs(vcf_file, panel, chrom, start, end, select_chr)
     rho = selectiontest.test_neutrality(sfs, variates0=None, variates1=None, reps=reps)
     click.echo(rho)
