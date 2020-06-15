@@ -8,7 +8,7 @@ The following python modules can be run from the bash command line, using the pr
 
     st test-neutrality sfs -r reps
 
-    st calculate-D sfs
+    st calculate-d sfs
 
     st compute-threshold n seg_sites -r reps -f fpr
 
