@@ -61,7 +61,7 @@ def compute_threshold(n, seg_sites, reps, fpr):
 @click.option('-r', '--reps', default=10000, help='Number of samples for Monte Carlo integration.')
 @click.option('-s', '--select_chr', default=True, type=bool)
 def test_neutrality_from_vcf(vcf_name, panel_name, coord, start, end, sel, reps, select_chr):
-    """Calculate the log odds ratio of the data computer from pPyVCF file VCF_NAME, proband details PANEL_NAME and
+    """Calculate the log odds ratio of the data specified by PyVCF file VCF_NAME, sample details PANEL_NAME and
     region defined by CHROM, START and END."""
     vcf_file = Reader(filename=vcf_name, compressed=True, encoding='utf-8')
     panel = pd.read_csv(panel_name, sep=None, engine='python', skipinitialspace=True, index_col=0)

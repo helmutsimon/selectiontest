@@ -20,5 +20,5 @@ In addition, there is a command cli test-neutrality-from-vcf to calculate :math:
 
 For details use command ``cli test-neutrality-from-vcf --help''.
 
-This requires vcf data and panel (proband) details in the format used by the 1000 Genomes Project at ftp://ftp.1000genomes.ebi.ac.uk/vol1/ftp/release/20130502/.
+This requires vcf data and sample panel details in the format used by the 1000 Genomes Project at ftp://ftp.1000genomes.ebi.ac.uk/vol1/ftp/release/20130502/.
 

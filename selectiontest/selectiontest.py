@@ -290,7 +290,7 @@ def piecewise_constant_variates(n, timepoints, pop_sizes, reps=10000):
 
 def vcf2sfs(vcf_file, panel, coord, start, end, select_chr=True):
     """
-    Get SFS from vcf data for given population and sequence. The panel file is used to select probands.
+    Get SFS from vcf data for given population and sequence. The panel file is used to select samples.
 
     Parameters
     ----------
@@ -298,7 +298,7 @@ def vcf2sfs(vcf_file, panel, coord, start, end, select_chr=True):
         Variant details
 
     panel: pandas DataFrame
-        Proband details
+        Sample details
 
     coord: str
         Coordinate (e.g. chromosome).
@@ -339,9 +339,9 @@ def vcf2sfs(vcf_file, panel, coord, start, end, select_chr=True):
             if record.INFO['AA'][0] not in [record.REF, record.ALT]:
                 continue
             anc_count += 1
-            for proband in record.samples:
-                if proband.sample in panel.index:
-                    gt = proband.gt_alleles
+            for sample in record.samples:
+                if sample.sample in panel.index:
+                    gt = sample.gt_alleles
                     if select_chr:
                         allele_count += int(gt[0])
                     else:
