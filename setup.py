@@ -31,7 +31,7 @@ setuptools.setup(
     python_requires='>=3.6',
     entry_points='''
     [console_scripts]
-        cli = selectiontest.stcli:selectiontestcli
+        st = selectiontest.stcli:selectiontestcli
         '''
 )
 
