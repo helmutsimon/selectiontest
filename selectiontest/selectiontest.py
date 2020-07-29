@@ -5,6 +5,10 @@ import numpy as np
 from bisect import bisect
 from scipy.special import binom
 from collections import Counter
+import re
+from math import log, factorial
+from more_itertools import locate
+import functools
 from selectiontest.__init__ import __version__
 
 
@@ -17,12 +21,75 @@ __email__ = "helmut.simon@anu.edu.au"
 __status__ = "Test"
 
 
-def get_ERM_matrix(n):
-    ERM_matrix = np.zeros((n - 1, n - 1))
-    for m in range(n - 1):
-        for k in range(n - 1):
-            ERM_matrix[m, k] = (k + 2) * binom(n - m - 2, k) / binom(n - 1, k + 1)
-    return ERM_matrix
+@functools.lru_cache(maxsize=512)
+def replace_zero(s, j):
+    """Replace jth 0 in string s with a 1. First character is given by j=0 etc."""
+    i = list(locate(s, lambda x: x == '0'))[j]
+    return s[:i] + '1' + s[i + 1:]
+
+
+@functools.lru_cache(maxsize=512)
+def make_row(s):
+    """Convert string of zeros (+) and ones (,) to matrix row, i.e. counting partitions by size."""
+    c = re.split('1', s)
+    return [int(len(x) + 1) for x in c]
+
+
+def derive_tree_matrix(f):
+    """Derive tree matrix from the list f. The first element of f is an integer in [0, n-1], the second
+    in [0, n-2] and so on."""
+    n = len(f) + 1
+    s = '0' * (n - 1)
+    result = list()
+    for j in f:
+        s = replace_zero(s, j)
+        orow = make_row(s)
+        urow = np.bincount(orow, minlength=n + 1)
+        urow = urow[1:-1]
+        result.append(urow)
+    mx = np.stack(result, axis=0)
+    return mx
+
+
+def sample_matrices2(n, size):
+    """
+        Sample tree matrices for sample size n according to ERM measure.
+
+        Parameters
+        ----------
+        n: int
+            Sample size
+        size: int
+            Number of samples.
+
+        Returns
+        -------
+        list
+            List containing 2 elements. The first is a dictionary with key n, containing a list of matrices, each
+            occurring once only. The second is also a dictionary with key, n containg a list of the nuimber of
+            instances of each matrix in the sample.
+
+        """
+    c = Counter()
+    count, hashes, matrices = 0, list(), list()
+    while count < size:
+        count += 1
+        f = list()
+        for i in range(1, n):
+            f.append(np.random.choice(i))
+        f = f[::-1]
+        mx = derive_tree_matrix(f)
+        hashmx = mx.tostring()
+        if hashmx not in hashes:
+            matrices.append(mx)
+            hashes.append(hashmx)
+        c[hashmx] += 1
+    counts = [c[hash] for hash in hashes]
+    counts = np.array(counts)
+    assert len(counts) == len(matrices), 'Counts do not match matrices.'
+    assert np.sum(counts) == size, 'Incorrect number of matrices selected.'
+    matrix_file = [{n: matrices}, {n: counts}]
+    return matrix_file
 
 
 def sample_wf_distribution(n, reps):
@@ -42,7 +109,10 @@ def sample_wf_distribution(n, reps):
          Array of variates (reps, n-1)
 
     """
-    erm = get_ERM_matrix(n)
+    matrix_file = sample_matrices2(n, reps)
+    matrices = matrix_file[0][n]
+    counts =   matrix_file[1][n]
+    print(counts)
     kvec = np.arange(2, n + 1, dtype=int)
     branch_lengths = np.random.exponential(scale=1 / binom(kvec, 2), size=(reps, n - 1))
     total_branch_lengths = branch_lengths @ kvec
@@ -51,8 +121,23 @@ def sample_wf_distribution(n, reps):
         rel_row = row / total_length
         rel_branch_lengths.append(rel_row)
     rel_branch_lengths = np.array(rel_branch_lengths)
-    variates = (erm @ rel_branch_lengths.T).T
-    return variates
+    variates = list()
+    rbl_count = 0
+    for i, count in enumerate(counts):
+        for j in range(count):
+            mx = matrices[i]
+            variate = (mx.T).dot(rel_branch_lengths[rbl_count])
+            rbl_count += 1
+            variates.append(variate)
+    return np.array(variates)
+
+
+def get_ERM_matrix(n):
+    ERM_matrix = np.zeros((n - 1, n - 1))
+    for m in range(n - 1):
+        for k in range(n - 1):
+            ERM_matrix[m, k] = (k + 2) * binom(n - m - 2, k) / binom(n - 1, k + 1)
+    return ERM_matrix
 
 
 def sample_uniform_distribution(n, reps):
@@ -80,23 +165,36 @@ def sample_uniform_distribution(n, reps):
     return variates.T
 
 
-def quasi_pmf(counts, probs):
+def multinomial_pmf(counts, probs):
     """
-    Calculate a multiple of the PMF of multinomial distribution. Number of draws is the sum of counts.
-    probs can be a 2D array, with each row totalling 1.
-    For efficiency, we ignore factors in the multinomial pmf that do not involve probs, as these
-    cancel out in test_neutrality.
+    Calculates probability mass function (PMF) for the multinomial distribution.
 
+    Parameters
+    ----------
+    counts: int
+        Number of counts in each category, from sum(counts) drsws'
+    probs: numpy.ndarray (r, n-1)
+        Vector of probabilities or an array with r rows in which each row is a vector of probabilities.
+
+    Returns
+    -------
+    numpy.ndarray
+         Array of variates (r, n-1).
     """
-    xx = list()
-    for row in probs:
-        new_row = np.log(row) * counts
-        xx.append(new_row)
-    xx = np.array(xx)
+    probs = np.array(probs)
+    if probs.ndim == 1:
+        probs.shape = (1, probs.shape[0])
     counts = np.array(counts)
-    xx[:, np.where(counts == 0.)] = 0.   # otherwise x will contain NaN even if count = 0
-    x = np.sum(xx, axis=1)
-    return np.exp(x)
+    results = list()
+    for pvec in probs:
+        xx = np.log(pvec) * counts
+        xx[np.where(counts == 0.)] = 0.                # otherwise x will contain NaN even if count = 0
+        x = np.sum(xx)
+        y = np.sum([log(factorial(i)) for i in counts])
+        z = np.sum(np.log(np.arange(1, sum(counts) + 1)))
+        pmf = np.exp(x + z - y)
+        results.append(pmf)
+    return np.array(results)
 
 
 def test_neutrality(sfs, variates0=None, variates1=None, reps=10000):
@@ -111,7 +209,7 @@ def test_neutrality(sfs, variates0=None, variates1=None, reps=10000):
     variates0: numpy array
         Array of variates from null hypothesis distribution. Default uses Wright-Fisher model.
     variates1: numpy array
-        Array of variates from null hypothesis distribution. Default uses \`uniform\' model.
+        Array of variates from alternative distribution. Default uses \`uniform\' model.
     reps: int
         Number of variates to generate if default is used.
 
@@ -127,8 +225,8 @@ def test_neutrality(sfs, variates0=None, variates1=None, reps=10000):
         variates0 = sample_wf_distribution(n, reps)
     if variates1 is None:
         variates1 = sample_uniform_distribution(n, reps)
-    h0 = np.sum(quasi_pmf(sfs, variates0))
-    h1 = np.sum(quasi_pmf(sfs, variates1))
+    h0 = np.sum(multinomial_pmf(sfs, variates0))
+    h1 = np.sum(multinomial_pmf(sfs, variates1))
     return np.log10(h1) - np.log10(h0)
 
 
@@ -298,7 +396,7 @@ def vcf2sfs(vcf_file, panel, coord, start, end, select_chr=True):
         Variant details
 
     panel: pandas DataFrame
-        Sample details
+        Proband details
 
     coord: str
         Coordinate (e.g. chromosome).
