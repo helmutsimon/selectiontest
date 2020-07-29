@@ -7,6 +7,7 @@ from scipy.special import binom
 from collections import Counter
 import re
 from math import log, factorial
+from scipy.stats import multinomial
 from more_itertools import locate
 import functools
 from selectiontest.__init__ import __version__
@@ -127,6 +128,7 @@ def sample_wf_distribution(n, reps):
             mx = matrices[i]
             variate = (mx.T).dot(rel_branch_lengths[rbl_count])
             rbl_count += 1
+            variate = variate / np.sum(variate)
             variates.append(variate)
     return np.array(variates)
 
