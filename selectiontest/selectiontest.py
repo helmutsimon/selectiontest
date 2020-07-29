@@ -111,8 +111,7 @@ def sample_wf_distribution(n, reps):
     """
     matrix_file = sample_matrices2(n, reps)
     matrices = matrix_file[0][n]
-    counts =   matrix_file[1][n]
-    print(counts)
+    counts = matrix_file[1][n]
     kvec = np.arange(2, n + 1, dtype=int)
     branch_lengths = np.random.exponential(scale=1 / binom(kvec, 2), size=(reps, n - 1))
     total_branch_lengths = branch_lengths @ kvec
@@ -185,13 +184,13 @@ def multinomial_pmf(counts, probs):
     if probs.ndim == 1:
         probs.shape = (1, probs.shape[0])
     counts = np.array(counts)
+    y = np.sum([log(factorial(i)) for i in counts])
+    z = np.sum(np.log(np.arange(1, sum(counts) + 1)))
     results = list()
     for pvec in probs:
         xx = np.log(pvec) * counts
         xx[np.where(counts == 0.)] = 0.                # otherwise x will contain NaN even if count = 0
         x = np.sum(xx)
-        y = np.sum([log(factorial(i)) for i in counts])
-        z = np.sum(np.log(np.arange(1, sum(counts) + 1)))
         pmf = np.exp(x + z - y)
         results.append(pmf)
     return np.array(results)
