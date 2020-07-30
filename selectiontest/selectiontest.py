@@ -128,7 +128,8 @@ def sample_wf_distribution(n, reps):
             mx = matrices[i]
             variate = (mx.T).dot(rel_branch_lengths[rbl_count])
             rbl_count += 1
-            variate = variate / np.sum(variate)
+            err = 1 - np.sum(variate)
+            variate[np.argmax(variate)] += err
             variates.append(variate)
     return np.array(variates)
 
@@ -222,12 +223,13 @@ def test_neutrality(sfs, variates0=None, variates1=None, reps=10000):
 
     """
     n = len(sfs) + 1
+    segsites = sum(sfs)
     if variates0 is None:
         variates0 = sample_wf_distribution(n, reps)
     if variates1 is None:
         variates1 = sample_uniform_distribution(n, reps)
-    h0 = np.sum(multinomial_pmf(sfs, variates0))
-    h1 = np.sum(multinomial_pmf(sfs, variates1))
+    h0 = np.sum(multinomial.pmf(sfs, segsites, variates0))
+    h1 = np.sum(multinomial.pmf(sfs, segsites, variates1))
     return np.log10(h1) - np.log10(h0)
 
 
