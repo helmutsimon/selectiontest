@@ -7,7 +7,8 @@ from scipy.special import binom
 from collections import Counter
 import re
 from math import log, factorial
-from scipy.stats import multinomial
+#from scipy.stats import multinomial
+from scipy.special import xlogy, gammaln
 from more_itertools import locate
 import functools
 from selectiontest.__init__ import __version__
@@ -167,9 +168,9 @@ def sample_uniform_distribution(n, reps):
     return variates.T
 
 
-def multinomial_pmf(counts, probs):
+def multinomial_pmf_old(counts, probs):
     """
-    Calculates probability mass function (PMF) for the multinomial distribution.
+    Calculates probability mass function (PMF) for the multinomial distribution. Slow.
 
     Parameters
     ----------
@@ -197,6 +198,12 @@ def multinomial_pmf(counts, probs):
         pmf = np.exp(x + z - y)
         results.append(pmf)
     return np.array(results)
+
+
+def multinomial_pmf(x, n, p):
+    x = np.array(x)
+    logpmf = gammaln(n + 1) + np.sum(xlogy(x, p) - gammaln(x + 1), axis=-1)
+    return np.exp(logpmf)
 
 
 def test_neutrality(sfs, variates0=None, variates1=None, reps=10000):
@@ -228,8 +235,8 @@ def test_neutrality(sfs, variates0=None, variates1=None, reps=10000):
         variates0 = sample_wf_distribution(n, reps)
     if variates1 is None:
         variates1 = sample_uniform_distribution(n, reps)
-    h0 = np.sum(multinomial.pmf(sfs, segsites, variates0))
-    h1 = np.sum(multinomial.pmf(sfs, segsites, variates1))
+    h0 = np.sum(multinomial_pmf(sfs, segsites, variates0))
+    h1 = np.sum(multinomial_pmf(sfs, segsites, variates1))
     return np.log10(h1) - np.log10(h0)
 
 
