@@ -73,7 +73,7 @@ def sample_branch_lengths(n, reps):
         yield rel_row
 
 
-def sample_wf_distribution_generator(n, reps):
+def sample_wf_distribution(n, reps):
     """
     Calculate variates for the probability distribution Q under Wright Fisher model.
 
@@ -95,28 +95,6 @@ def sample_wf_distribution_generator(n, reps):
         err = 1 - np.sum(variate)
         variate[np.argmax(variate)] += err
         yield(variate)
-
-
-def sample_wf_distribution(n, size, njobs=1):
-    """
-        Calculate variates for the probability distribution Q under Wright Fisher model.
-
-        Parameters
-        ----------
-        n: int
-            Sample size
-        reps: int
-            Number of variates to generate if default is used.
-
-        Returns
-        -------
-        numpy.ndarray
-             Array of variates (reps, n-1)
-
-        """
-    seeds = np.random.choice(2 * njobs, njobs, replace=False)
-    results = Parallel(n_jobs=njobs)(delayed(sample_wf_distribution_generator)(n, size, seed) for seed in seeds)
-    return np.vstack(results)
 
 
 def get_ERM_matrix(n):
@@ -184,7 +162,9 @@ def test_neutrality(sfs, variates0=None, variates1=None, reps=10000):
     n = len(sfs) + 1
     segsites = sum(sfs)
     if variates0 is None:
-        variates0 = sample_wf_distribution(n, reps)
+        variates0 = np.empty(reps, n - 1)
+        for i, q in enumerate(sample_wf_distribution(n, reps)):
+            variates0[i] = q
     if variates1 is None:
         variates1 = sample_uniform_distribution(n, reps)
     h0 = np.sum(multinomial_pmf(sfs, segsites, variates0))
