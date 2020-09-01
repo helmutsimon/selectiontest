@@ -4,6 +4,7 @@
 import numpy as np
 from bisect import bisect
 from scipy.special import binom
+from joblib import Parallel, delayed
 from collections import Counter
 import re
 from scipy.special import xlogy, gammaln
@@ -51,48 +52,28 @@ def derive_tree_matrix(f):
     return mx
 
 
-def sample_matrices2(n, size):
-    """
-        Sample tree matrices for sample size n according to ERM measure.
-
-        Parameters
-        ----------
-        n: int
-            Sample size
-        size: int
-            Number of samples.
-
-        Returns
-        -------
-        list
-            List containing 2 elements. The first is a dictionary with key n, containing a list of matrices, each
-            occurring once only. The second is also a dictionary with key, n containg a list of the nuimber of
-            instances of each matrix in the sample.
-
-        """
-    c = Counter()
-    count, hashes, matrices = 0, list(), list()
-    while count < size:
-        count += 1
+def sample_matrix(n, reps):
+    "A generator returning reps matrices for sample size n, according to the ERM distribution."
+    for i in range(reps):
         f = list()
         for i in range(1, n):
             f.append(np.random.choice(i))
         f = f[::-1]
         mx = derive_tree_matrix(f)
-        hashmx = mx.tostring()
-        if hashmx not in hashes:
-            matrices.append(mx)
-            hashes.append(hashmx)
-        c[hashmx] += 1
-    counts = [c[hash] for hash in hashes]
-    counts = np.array(counts)
-    assert len(counts) == len(matrices), 'Counts do not match matrices.'
-    assert np.sum(counts) == size, 'Incorrect number of matrices selected.'
-    matrix_file = [{n: matrices}, {n: counts}]
-    return matrix_file
+        yield mx
 
 
-def sample_wf_distribution(n, reps):
+def sample_branch_lengths(n, reps):
+    "A generator returning reps sets of relative branch lengths for sample size n, according to the ERM distribution."
+    kvec = np.arange(2, n + 1, dtype=int)
+    branch_lengths = np.random.exponential(scale=1 / binom(kvec, 2), size=(reps, n - 1))
+    total_branch_lengths = branch_lengths @ kvec
+    for row, total_length in zip(branch_lengths, total_branch_lengths):
+        rel_row = row / total_length
+        yield rel_row
+
+
+def sample_wf_distribution_generator(n, reps):
     """
     Calculate variates for the probability distribution Q under Wright Fisher model.
 
@@ -103,34 +84,39 @@ def sample_wf_distribution(n, reps):
     reps: int
         Number of variates to generate if default is used.
 
-    Returns
+    Yields
     -------
     numpy.ndarray
-         Array of variates (reps, n-1)
+         Array of variates (n-1)
 
     """
-    matrix_file = sample_matrices2(n, reps)
-    matrices = matrix_file[0][n]
-    counts = matrix_file[1][n]
-    kvec = np.arange(2, n + 1, dtype=int)
-    branch_lengths = np.random.exponential(scale=1 / binom(kvec, 2), size=(reps, n - 1))
-    total_branch_lengths = branch_lengths @ kvec
-    rel_branch_lengths = list()
-    for row, total_length in zip(branch_lengths, total_branch_lengths):
-        rel_row = row / total_length
-        rel_branch_lengths.append(rel_row)
-    rel_branch_lengths = np.array(rel_branch_lengths)
-    variates = list()
-    rbl_count = 0
-    for i, count in enumerate(counts):
-        for j in range(count):
-            mx = matrices[i]
-            variate = (mx.T).dot(rel_branch_lengths[rbl_count])
-            rbl_count += 1
-            err = 1 - np.sum(variate)
-            variate[np.argmax(variate)] += err
-            variates.append(variate)
-    return np.array(variates)
+    for mx, rel_branch_length in zip(sample_matrix(n, reps), sample_branch_lengths(n, reps)):
+        variate = (mx.T).dot(rel_branch_length)
+        err = 1 - np.sum(variate)
+        variate[np.argmax(variate)] += err
+        yield(variate)
+
+
+def sample_wf_distribution(n, size, njobs=1):
+    """
+        Calculate variates for the probability distribution Q under Wright Fisher model.
+
+        Parameters
+        ----------
+        n: int
+            Sample size
+        reps: int
+            Number of variates to generate if default is used.
+
+        Returns
+        -------
+        numpy.ndarray
+             Array of variates (reps, n-1)
+
+        """
+    seeds = np.random.choice(2 * njobs, njobs, replace=False)
+    results = Parallel(n_jobs=njobs)(delayed(sample_wf_distribution_generator)(n, size, seed) for seed in seeds)
+    return np.vstack(results)
 
 
 def get_ERM_matrix(n):

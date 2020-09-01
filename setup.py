@@ -15,7 +15,7 @@ setuptools.setup(
     url="https://github.com/helmutsimon/SelectionTest",
     packages=["selectiontest"],
     package_dir={"selectiontest": "selectiontest"},
-    install_requires=['click', 'numpy', 'scipy', 'pandas', 'pysam', 'PyVCF'],
+    install_requires=['click', 'numpy', 'scipy', 'pandas', 'pysam', 'PyVCF', 'joblib'],
     extras_require={
             "dev": [
                 "pytest",
