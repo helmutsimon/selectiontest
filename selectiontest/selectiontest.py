@@ -255,14 +255,7 @@ def generate_sfs_array(n, seg_sites, reps=10000):
     return sfs_array
 
 
-def test_neutrality_func(variates0=None, variates1=None, reps=10000):
-    def test_neutrality_set(sfs):
-        return test_neutrality(sfs, variates0=variates0, variates1=variates1, reps=reps)
-
-    return test_neutrality_set
-
-
-def compute_threshold(n, seg_sites, reps=10000, fpr=0.02):
+def compute_threshold(n, seg_sites, njobs, sreps=10000, wreps=10000, fpr=0.02):
     """
     Calculate threshold value of :math:`\\rho` corresponding to a given false positive rate (FPR).
     For values of :math:`\\rho` above the threshold we reject the
@@ -274,8 +267,12 @@ def compute_threshold(n, seg_sites, reps=10000, fpr=0.02):
         Sample size
     seg_sites: int
         Number of segregating sites in sample.
-    reps: int
-        Number of variates to generate if default is used.
+    njobs: int
+        Number of parallel joblib processes.
+    sreps: int
+        Number of SFS configs and of uniform variates to generate if default is used.
+    wreps: int
+        Number of Wright-Fisher variates to generate if default is used.
     fpr: float
         Selected FPR tolerance.
 
@@ -285,12 +282,27 @@ def compute_threshold(n, seg_sites, reps=10000, fpr=0.02):
         Threshold value for log odds ratio
 
     """
-
-    variates0 = sample_wf_distribution(n, 10000)
-    variates1 = sample_uniform_distribution(n, 10000)
-    test_neutrality_set = test_neutrality_func(variates0, variates1, reps)
-    sfs_array = generate_sfs_array(n, seg_sites, reps)
-    results = np.apply_along_axis(test_neutrality_set, 1, sfs_array)
+    variates0 = sample_wf_distribution(n, wreps, njobs)
+    variates1 = sample_uniform_distribution(n, sreps)
+    sfs_array = generate_sfs_array(n, seg_sites, sreps)
+    num_wf_vars = variates0.shape[0]
+    results = list()
+    for sfs in sfs_array:
+        a = sfs > 0
+        b = variates0[:, a] > 0
+        c = np.all(b > 0, axis=1)
+        compat_vars = variates0[c, :]
+        if compat_vars.shape[0] == 0:
+            h0 = 0
+        else:
+            h0 = np.sum(multinomial_pmf(sfs, seg_sites, compat_vars)) / num_wf_vars
+        h1 = np.mean(multinomial_pmf(sfs, seg_sites, variates1))
+        rho = np.log10(h1) - np.log10(h0)
+        results.append(rho)
+    results = np.array(results)
+    print("Count -inf: ", np.sum(np.isneginf(results)))
+    print("Count  inf: ", np.sum(np.isinf(results)))
+    print("Count  nan: ", np.sum(np.isnan(results)))
     results = results[~np.isnan(results)]
     results = np.sort(results)
     return results[int(len(results) * (1 - fpr))]
