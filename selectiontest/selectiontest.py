@@ -6,8 +6,6 @@ from bisect import bisect
 from scipy.special import binom
 from collections import Counter
 import re
-from math import log, factorial
-#from scipy.stats import multinomial
 from scipy.special import xlogy, gammaln
 from more_itertools import locate
 import functools
@@ -166,38 +164,6 @@ def sample_uniform_distribution(n, reps):
     sample = np.random.dirichlet(np.ones(n - 1), size=reps)
     variates = avge_mx @ sample.T
     return variates.T
-
-
-def multinomial_pmf_old(counts, probs):
-    """
-    Calculates probability mass function (PMF) for the multinomial distribution. Slow.
-
-    Parameters
-    ----------
-    counts: int
-        Number of counts in each category, from sum(counts) drsws'
-    probs: numpy.ndarray (r, n-1)
-        Vector of probabilities or an array with r rows in which each row is a vector of probabilities.
-
-    Returns
-    -------
-    numpy.ndarray
-         Array of variates (r, n-1).
-    """
-    probs = np.array(probs)
-    if probs.ndim == 1:
-        probs.shape = (1, probs.shape[0])
-    counts = np.array(counts)
-    y = np.sum([log(factorial(i)) for i in counts])
-    z = np.sum(np.log(np.arange(1, sum(counts) + 1)))
-    results = list()
-    for pvec in probs:
-        xx = np.log(pvec) * counts
-        xx[np.where(counts == 0.)] = 0.                # otherwise x will contain NaN even if count = 0
-        x = np.sum(xx)
-        pmf = np.exp(x + z - y)
-        results.append(pmf)
-    return np.array(results)
 
 
 def multinomial_pmf(x, n, p):
