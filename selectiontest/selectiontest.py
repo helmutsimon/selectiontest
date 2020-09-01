@@ -230,12 +230,11 @@ def generate_sfs_array(n, seg_sites, reps=10000):
     number of segregating sites.
 
     """
-    variates = sample_wf_distribution(n, reps)
-    sfs_array = np.apply_along_axis(mul(seg_sites), 1, variates)
-    return sfs_array
+    for p in sample_wf_distribution(n, reps):
+        yield np.random.multinomial(seg_sites, p)
 
 
-def compute_threshold(n, seg_sites, njobs, sreps=10000, wreps=10000, fpr=0.02):
+def compute_threshold(n, seg_sites, sreps=10000, wreps=10000, fpr=0.02):
     """
     Calculate threshold value of :math:`\\rho` corresponding to a given false positive rate (FPR).
     For values of :math:`\\rho` above the threshold we reject the
@@ -247,8 +246,6 @@ def compute_threshold(n, seg_sites, njobs, sreps=10000, wreps=10000, fpr=0.02):
         Sample size
     seg_sites: int
         Number of segregating sites in sample.
-    njobs: int
-        Number of parallel joblib processes.
     sreps: int
         Number of SFS configs and of uniform variates to generate if default is used.
     wreps: int
@@ -262,12 +259,13 @@ def compute_threshold(n, seg_sites, njobs, sreps=10000, wreps=10000, fpr=0.02):
         Threshold value for log odds ratio
 
     """
-    variates0 = sample_wf_distribution(n, wreps, njobs)
+    variates0 = np.empty(wreps, n - 1)
+    for i, q in enumerate(sample_wf_distribution(n, wreps)):
+        variates0[i] = q
     variates1 = sample_uniform_distribution(n, sreps)
-    sfs_array = generate_sfs_array(n, seg_sites, sreps)
     num_wf_vars = variates0.shape[0]
     results = list()
-    for sfs in sfs_array:
+    for sfs in generate_sfs_array(n, seg_sites, sreps):
         a = sfs > 0
         b = variates0[:, a] > 0
         c = np.all(b > 0, axis=1)
@@ -327,7 +325,9 @@ def piecewise_constant_variates(n, timepoints, pop_sizes, reps=10000):
          Array of variates
 
     """
-    variates = sample_wf_distribution(n, reps)
+    variates = np.empty(reps, n - 1)
+    for i, q in enumerate(sample_wf_distribution(n, reps)):
+        variates[i] = q
     branches = np.flip(variates, axis=1)
     s_k = np.cumsum(branches, axis=1)
     func1 = calc_branch_length2(pop_sizes, timepoints)
