@@ -4,7 +4,6 @@
 import numpy as np
 from bisect import bisect
 from scipy.special import binom
-from joblib import Parallel, delayed
 from collections import Counter
 import re
 from scipy.special import xlogy, gammaln
@@ -162,7 +161,7 @@ def test_neutrality(sfs, variates0=None, variates1=None, reps=10000):
     n = len(sfs) + 1
     segsites = sum(sfs)
     if variates0 is None:
-        variates0 = np.empty(reps, n - 1)
+        variates0 = np.empty((reps, n - 1), dtype=float)
         for i, q in enumerate(sample_wf_distribution(n, reps)):
             variates0[i] = q
     if variates1 is None:
@@ -259,7 +258,7 @@ def compute_threshold(n, seg_sites, sreps=10000, wreps=10000, fpr=0.02):
         Threshold value for log odds ratio
 
     """
-    variates0 = np.empty(wreps, n - 1)
+    variates0 = np.empty((wreps, n - 1), dtype=float)
     for i, q in enumerate(sample_wf_distribution(n, wreps)):
         variates0[i] = q
     variates1 = sample_uniform_distribution(n, sreps)
@@ -325,7 +324,7 @@ def piecewise_constant_variates(n, timepoints, pop_sizes, reps=10000):
          Array of variates
 
     """
-    variates = np.empty(reps, n - 1)
+    variates = np.empty((reps, n - 1), dtype=float)
     for i, q in enumerate(sample_wf_distribution(n, reps)):
         variates[i] = q
     branches = np.flip(variates, axis=1)
