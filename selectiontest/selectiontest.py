@@ -287,20 +287,36 @@ def compute_threshold(n, seg_sites, sreps=10000, wreps=10000, fpr=0.02):
 
 def calc_breakpoints(pop_sizes, timepoints):
     y = 0
+    assert timepoints[0] == 0, 'Timepoints must start with zero.""'
     result = [0]
-    for i in range(0, len(timepoints) - 1):
+    for i in range(len(timepoints) - 1):
         y += (pop_sizes[0] / pop_sizes[i]) * (timepoints[i + 1] - timepoints[i])
         result.append(y)
     return result
 
 
-def calc_branch_length2(pop_sizes, timepoints):
-    def calc_branch_length3(branch):
-        breakpoints = calc_breakpoints(pop_sizes, timepoints)
-        i = bisect(breakpoints, branch)
-        return timepoints[i - 1] + (pop_sizes[i - 1] / pop_sizes[0]) * (branch - breakpoints[i - 1])
+def transform_coal_times(coal_times, timepoints, pop_sizes):
+    """
+    Transform an array of times.
+    """
+    breakpoints = calc_breakpoints(pop_sizes, timepoints)
+    results = list()
+    for ct in coal_times:
+        i = bisect(breakpoints, ct)
+        y = (timepoints[i - 1] + (pop_sizes[i - 1] / pop_sizes[0]) * (ct - breakpoints[i - 1]))
+        results.append(y)
+    return np.array(results)
 
-    return calc_branch_length3
+
+def branch_lengths_to_coal_times(branch_lengths):
+    blsf = np.flip(branch_lengths)
+    return np.cumsum(blsf)
+
+
+def coal_times_to_branch_lengths(coal_times):
+    ctsf1 = np.diff(coal_times)
+    ctsf = np.insert(ctsf1, 0, coal_times[0])
+    return np.flip(ctsf)
 
 
 def piecewise_constant_variates(n, timepoints, pop_sizes, reps=10000):
@@ -318,25 +334,25 @@ def piecewise_constant_variates(n, timepoints, pop_sizes, reps=10000):
     reps: int
         Number of variates to generate.
 
-    Returns
+    Yields
     -------
     numpy.ndarray
-         Array of variates
+         Variates
 
     """
-    variates = np.empty((reps, n - 1), dtype=float)
-    for i, q in enumerate(sample_wf_distribution(n, reps)):
-        variates[i] = q
-    branches = np.flip(variates, axis=1)
-    s_k = np.cumsum(branches, axis=1)
-    func1 = calc_branch_length2(pop_sizes, timepoints)
-    vfunc = np.vectorize(func1)
-    coal_times = vfunc(s_k)
-    temp = np.diff(coal_times, axis=1)
-    col2 = coal_times[:, 0]
-    col2.shape = (col2.shape[0], 1)
-    temp1 = np.hstack([col2, temp])
-    return np.flip(temp1, axis=1)
+    zipped = zip(sample_matrix(n, reps), sample_branch_lengths(n, reps))
+    for mx, branch_lengths in zipped:
+        coal_times = branch_lengths_to_coal_times(branch_lengths)
+        tranf_coal_times = transform_coal_times(coal_times, timepoints, pop_sizes)
+        transf_branch_lengths = coal_times_to_branch_lengths(tranf_coal_times)
+        kvec = np.arange(2, n + 1, dtype=int)
+        total_branch_length = np.sum(transf_branch_lengths * kvec)
+        rel_branch_lengths = transf_branch_lengths / total_branch_length
+        variate = (mx.T).dot(rel_branch_lengths)
+        err = 1 - np.sum(variate)
+        variate[np.argmax(variate)] += err
+        yield(variate, tranf_coal_times)
+
 
 
 def vcf2sfs(vcf_file, panel, coord, start, end, select_chr=True):
