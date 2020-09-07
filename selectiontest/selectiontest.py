@@ -93,7 +93,7 @@ def sample_wf_distribution(n, reps):
         variate = (mx.T).dot(rel_branch_length)
         err = 1 - np.sum(variate)
         variate[np.argmax(variate)] += err
-        yield(variate)
+        yield variate
 
 
 def get_ERM_matrix(n):
@@ -343,15 +343,15 @@ def piecewise_constant_variates(n, timepoints, pop_sizes, reps=10000):
     zipped = zip(sample_matrix(n, reps), sample_branch_lengths(n, reps))
     for mx, branch_lengths in zipped:
         coal_times = branch_lengths_to_coal_times(branch_lengths)
-        tranf_coal_times = transform_coal_times(coal_times, timepoints, pop_sizes)
-        transf_branch_lengths = coal_times_to_branch_lengths(tranf_coal_times)
+        transf_coal_times = transform_coal_times(coal_times, timepoints, pop_sizes)
+        transf_branch_lengths = coal_times_to_branch_lengths(transf_coal_times)
         kvec = np.arange(2, n + 1, dtype=int)
         total_branch_length = np.sum(transf_branch_lengths * kvec)
         rel_branch_lengths = transf_branch_lengths / total_branch_length
         variate = (mx.T).dot(rel_branch_lengths)
         err = 1 - np.sum(variate)
         variate[np.argmax(variate)] += err
-        yield(variate, tranf_coal_times)
+        yield variate, transf_coal_times
 
 
 
