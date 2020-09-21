@@ -166,8 +166,8 @@ def test_neutrality(sfs, variates0=None, variates1=None, reps=10000):
             variates0[i] = q
     if variates1 is None:
         variates1 = sample_uniform_distribution(n, reps)
-    h0 = np.sum(multinomial_pmf(sfs, segsites, variates0))
-    h1 = np.sum(multinomial_pmf(sfs, segsites, variates1))
+    h0 = np.mean(multinomial_pmf(sfs, segsites, variates0))
+    h1 = np.mean(multinomial_pmf(sfs, segsites, variates1))
     return np.log10(h1) - np.log10(h0)
 
 
