@@ -1,3 +1,5 @@
+# coding=utf-8
+
 __author__ = "Helmut Simon"
 __copyright__ = "© Copyright 2020, Helmut Simon"
 __license__ = "BSD-3"
