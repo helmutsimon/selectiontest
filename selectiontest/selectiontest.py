@@ -37,7 +37,7 @@ def make_row(s):
 
 def derive_tree_matrix(f):
     """Derive tree matrix from the list f. The first element of f is an integer in [0, n-1], the second
-    in [0, n-2] and so on."""
+    in [0, n-2] and so on (Lehmer code)."""
     n = len(f) + 1
     s = '0' * (n - 1)
     result = list()
@@ -63,7 +63,7 @@ def sample_matrix(n, reps):
 
 
 def sample_branch_lengths(n, reps):
-    "A generator returning reps sets of relative branch lengths for sample size n, according to the ERM distribution."
+    "A generator returning reps sets of relative branch lengths for sample size n, according to the Wright-Fisher model."
     kvec = np.arange(2, n + 1, dtype=int)
     branch_lengths = np.random.exponential(scale=1 / binom(kvec, 2), size=(reps, n - 1))
     total_branch_lengths = branch_lengths @ kvec
