@@ -5,7 +5,7 @@ Welcome to selectiontest's documentation!
 
 Overview
 --------
-This repository contains python modules and command line scripts to support testing for selective neutrality using relative likelihood. It enables application of the methods described in Simon and Huttley *A New Statistical Test Provides Evidence of Selection Against Deleterious Mutations in Genes Promoting Disease Resistance* (in preparation). For other software supporting that paper, but not required for applications, see https://github.com/helmutsimon/NeutralityTest.
+This repository contains python modules and command line scripts to support testing for selective neutrality using relative likelihood. It enables application of the methods described in Simon and Huttley 2021 *A New Likelihood-based Test for Natural Selection* bioRxiv doi = 10.1101/2021.07.04.451068. For other software supporting that paper, but not required for applications, see https://github.com/helmutsimon/NeutralityTest.
 
 Functions available include:
 
