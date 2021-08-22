@@ -33,16 +33,18 @@ Source code is hosted at https://github.com/helmutsimon/selectiontest.
 
 Citation
 --------
-For the present, cite github repository. Bibtex:
+Bibtex:
 
 ::
 
-    @misc{simon_selection,
-    author = {Simon, Helmut and Huttley, Gavin},
-    title = {selectiontest 0.1.10},
-    year = {2020},
-    url = {https://github.com/helmutsimon/selectiontest},
-    note = {[https://github.com/helmutsimon/selectiontest]}}
+    @article{simon2021new,
+    title={A new likelihood-based test for natural selection},
+    author={Simon, Helmut and Huttley, Gavin A.},
+    journal={bioRxiv},
+    year={2021},
+    doi= {10.1101/2021.07.04.451068}
+    publisher={Cold Spring Harbor Laboratory}
+}
 
 Indices and tables
 ------------------
