@@ -15,10 +15,9 @@ setuptools.setup(
     url="https://github.com/helmutsimon/SelectionTest",
     packages=["selectiontest"],
     package_dir={"selectiontest": "selectiontest"},
-    install_requires=['click', 'numpy', 'scipy', 'pandas', 'pysam', 'PyVCF', 'joblib', 'more_itertools'],
+    install_requires=['click', 'numpy', 'scipy', 'pandas', 'pysam', 'PyVCF', 'joblib', 'more_itertools',  'sphinx-click'],
     extras_require={
             "dev": [
-                "sphinx-click",
                 "pytest",
                 "sphinx",
                 "cogent3",
