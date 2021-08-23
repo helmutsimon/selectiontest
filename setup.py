@@ -18,6 +18,7 @@ setuptools.setup(
     install_requires=['click', 'numpy', 'scipy', 'pandas', 'pysam', 'PyVCF', 'joblib', 'more_itertools'],
     extras_require={
             "dev": [
+                "sphinx-click"
                 "pytest",
                 "sphinx",
                 "cogent3",
