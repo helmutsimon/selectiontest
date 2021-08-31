@@ -55,8 +55,8 @@ def sample_matrix(n, reps):
     "A generator returning reps matrices for sample size n, according to the ERM distribution."
     for i in range(reps):
         f = list()
-        for i in range(1, n):
-            f.append(np.random.choice(i))
+        for j in range(1, n):
+            f.append(np.random.choice(j))
         f = f[::-1]
         mx = derive_tree_matrix(f)
         yield mx
