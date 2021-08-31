@@ -216,13 +216,6 @@ def calculate_D(sfs):
     return tajD
 
 
-def mul(seg_sites):
-    def multinom(p):
-        return np.random.multinomial(seg_sites, p)
-
-    return multinom
-
-
 def generate_sfs_array(n, seg_sites, reps=10000):
     """
     Sample SFS values for Wright-Fisher model for given sample size n and conditioned on the
